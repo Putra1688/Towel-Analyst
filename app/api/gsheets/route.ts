@@ -1,0 +1,252 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getLoadedDoc, getSheet } from "@/lib/google-sheets";
+import { calculateMetrics, calculateBMI, getBMIStatus, calculateAchievement } from "@/lib/calculations";
+
+// Helper to map spreadsheet data to internal application format
+const mapUser = (row: any) => ({
+  User_ID: row.User_ID || "",
+  Username: row.Username || "",
+  Password: row.Password || "",
+  Name: row.Nama || "",
+  Role: row.Role || "client",
+  Weight: Number(row.BB) || 0,
+  Height: Number(row.TB) || 0,
+  Cabor: row.Cabor || "",
+  Birth_Date: row.Tgl_Lahir || ""
+});
+
+const mapLogbook = (row: any) => ({
+  User_ID: row.User_ID || "",
+  Date: row.Tanggal || "",
+  Activity: row.Nama_Aktivitas || "",
+  RPE: Number(row.RPE) || 0,
+  Duration: Number(row.Durasi) || 0,
+  Daily_Load: Number(row.Daily_Load) || 0
+});
+
+const mapMasterTest = (row: any) => ({
+  Test_ID: row.Test_ID || "",
+  Name: row.Nama_Tes || "",
+  Unit: row.Satuan || "",
+  Description: row.Deskripsi || "",
+  Category: "Physical" // Default
+});
+
+const mapTestFisik = (row: any) => ({
+  Date: row.Tanggal || "",
+  User_ID: row.User_ID || "",
+  Metric: row.Test_ID || "", // We map Test_ID to Metric for internal logic
+  Target: Number(row.Target) || 0,
+  Value: Number(row.Hasil) || 0,
+  achievement: Number(row.Achievement) || 0
+});
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const userRole = (session.user as any).role;
+  const userId = (session.user as any).userId;
+
+  try {
+    const usersSheet = await getSheet("users");
+    const logbookSheet = await getSheet("logbook_harian");
+    const testFisikSheet = await getSheet("test_fisik");
+    const masterTestSheet = await getSheet("master_test");
+
+    if (!usersSheet || !logbookSheet || !testFisikSheet || !masterTestSheet) {
+      throw new Error("One or more required sheets are missing in the Google Spreadsheet.");
+    }
+
+    const usersRaw = await usersSheet.getRows();
+    const logbookRaw = await logbookSheet.getRows();
+    const testFisikRaw = await testFisikSheet.getRows();
+    const masterTestRaw = await masterTestSheet.getRows();
+
+    let users = usersRaw.map(r => mapUser(r.toObject()));
+    let logbook = logbookRaw.map(r => mapLogbook(r.toObject()));
+    let tesFisik = testFisikRaw.map(r => mapTestFisik(r.toObject()));
+    const masterTests = masterTestRaw.map(r => mapMasterTest(r.toObject()));
+
+    // Filter by role
+    if (userRole === "client") {
+      logbook = logbook.filter(l => l.User_ID === userId);
+      tesFisik = tesFisik.filter(t => t.User_ID === userId);
+      users = users.filter(u => u.User_ID === userId);
+    }
+
+    const processAthleteData = (u: any, l: any[], t: any[]) => {
+      const metrics = calculateMetrics(l);
+      const bmi = calculateBMI(u.Weight, u.Height);
+      const bmiStatus = getBMIStatus(bmi);
+      
+      const testsWithAchievement = t.map(test => ({
+        ...test,
+        achievement: calculateAchievement(test.Value, test.Target)
+      }));
+
+      const avgAchievement = testsWithAchievement.length > 0 
+        ? Math.round(testsWithAchievement.reduce((acc, cur) => acc + cur.achievement, 0) / testsWithAchievement.length)
+        : 0;
+
+      return {
+        user: u,
+        metrics,
+        bmi,
+        bmiStatus,
+        tes_fisik: testsWithAchievement,
+        avgAchievement
+      };
+    };
+
+    if (userRole === "client") {
+      return NextResponse.json({
+        ...processAthleteData(users[0], logbook, tesFisik),
+        masterTests
+      });
+    }
+
+    const uniqueUsers = users.filter(u => u.Role === "client");
+    const summary = uniqueUsers.map(u => {
+      const uLogbook = logbook.filter(l => l.User_ID === u.User_ID);
+      const uTests = tesFisik.filter(t => t.User_ID === u.User_ID);
+      return processAthleteData(u, uLogbook, uTests);
+    });
+
+    return NextResponse.json({
+      summary,
+      teamBmiDistribution: {
+        Optimal: summary.filter(s => s.bmiStatus === "Optimal").length,
+        Kurang: summary.filter(s => s.bmiStatus === "Kurang").length,
+        Overweight: summary.filter(s => s.bmiStatus === "Overweight").length,
+      },
+      teamAvgAchievement: summary.length > 0
+        ? Math.round(summary.reduce((acc, cur) => acc + cur.avgAchievement, 0) / summary.length)
+        : 0,
+      masterTests
+    });
+
+  } catch (error: any) {
+    console.error("API Error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const body = await req.json();
+    const { action, payload } = body;
+
+    switch (action) {
+      case "addAthlete": {
+        const sheet = await getSheet("users");
+        const rows = await sheet?.getRows();
+        const nextIdNumber = (rows?.length || 0) + 1;
+        const nextId = `ath-${nextIdNumber.toString().padStart(3, '0')}`;
+        
+        await sheet?.addRow({
+          User_ID: nextId,
+          Username: payload.username,
+          Password: payload.password,
+          Nama: payload.name,
+          Role: "client",
+          BB: payload.weight,
+          TB: payload.height,
+          Cabor: payload.cabor,
+          Tgl_Lahir: payload.birthDate
+        });
+        return NextResponse.json({ success: true, id: nextId });
+      }
+
+      case "updateProfile": {
+        const sheet = await getSheet("users");
+        const rows = await sheet?.getRows();
+        const row = rows?.find(r => r.get("User_ID") === payload.userId);
+        if (row) {
+          row.set("Nama", payload.Name);
+          row.set("BB", payload.Weight);
+          row.set("TB", payload.Height);
+          row.set("Tgl_Lahir", payload.Birth_Date);
+          await row.save();
+          return NextResponse.json({ success: true });
+        }
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      case "addLogbook": {
+        const sheet = await getSheet("logbook_harian");
+        await sheet?.addRow({
+          Timestamp: new Date().toISOString(),
+          User_ID: payload.userId,
+          Tanggal: payload.date,
+          Nama_Aktivitas: payload.activity,
+          RPE: payload.reps,
+          Durasi: payload.duration,
+          Daily_Load: payload.reps * payload.duration
+        });
+        return NextResponse.json({ success: true });
+      }
+
+      case "addTestResult": {
+        const sheet = await getSheet("test_fisik");
+        await sheet?.addRow({
+          Tanggal: payload.date,
+          User_ID: payload.userId,
+          Test_ID: payload.metric,
+          Target: payload.target,
+          Hasil: payload.value,
+          Achievement: Math.round((payload.value / payload.target) * 100)
+        });
+        return NextResponse.json({ success: true });
+      }
+
+      case "addMasterTest": {
+        const sheet = await getSheet("master_test");
+        const rows = await sheet?.getRows();
+        const nextId = (rows?.length || 0) + 1;
+        await sheet?.addRow({
+          Test_ID: nextId.toString(),
+          Nama_Tes: payload.Name,
+          Satuan: payload.Unit,
+          Deskripsi: payload.Description
+        });
+        return NextResponse.json({ success: true });
+      }
+
+      case "updateMasterTest": {
+        const sheet = await getSheet("master_test");
+        const rows = await sheet?.getRows();
+        const row = rows?.find(r => r.get("Test_ID") === payload.Test_ID);
+        if (row) {
+          row.set("Nama_Tes", payload.Name);
+          row.set("Satuan", payload.Unit);
+          row.set("Deskripsi", payload.Description);
+          await row.save();
+          return NextResponse.json({ success: true });
+        }
+        return NextResponse.json({ error: "Test not found" }, { status: 404 });
+      }
+
+      case "deleteMasterTest": {
+        const sheet = await getSheet("master_test");
+        const rows = await sheet?.getRows();
+        const row = rows?.find(r => r.get("Test_ID") === payload.testId);
+        if (row) {
+          await row.delete();
+          return NextResponse.json({ success: true });
+        }
+        return NextResponse.json({ error: "Test not found" }, { status: 404 });
+      }
+
+      default:
+        return NextResponse.json({ error: "Invalid Action" }, { status: 400 });
+    }
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

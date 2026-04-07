@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --brand-primary: #6366f1;
+            --brand-secondary: #a855f7;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .chart-container {
+            filter: drop-shadow(0 10px 15px rgba(99, 102, 241, 0.05));
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .card-glow-indigo {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+        const { 
+            AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+            ReferenceLine, BarChart, Bar, Cell, Legend
+        } = Recharts;
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const icons = {
+                User: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+                Trophy: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55.47.98.97 1.21C11.47 18.44 12 19 12 19s.53-.56 1.03-.79c.5-.23.97-.66.97-1.21v-2.34"></path><path d="M12 15c-3.31 0-6-2.69-6-6V3h12v6c0 3.31-2.69 6-6 6Z"></path></svg>,
+                Calendar: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>,
+                Activity: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
+                Save: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>,
+                Plus: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+                Trash: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+                TrendingUp: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>,
+                AlertCircle: <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
+            };
+            return icons[name] || null;
+        };
+
+        const App = () => {
+            const getEmptyWeek = () => [
+                { day: 'Sen', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Sel', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Rab', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Kam', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Jum', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Sab', sessions: [{ name: 'Sesi 1', rpe: 0, duration: 0 }] },
+                { day: 'Min', sessions: [{ name: 'Istirahat', rpe: 0, duration: 0 }] },
+            ];
+
+            const [athletes, setAthletes] = useState([
+                { 
+                    id: 1, 
+                    name: 'Pratama Arhan', 
+                    cabor: 'Sepak Bola', 
+                    usia: 22, 
+                    bb: 70, 
+                    tb: 172, 
+                    dob: '2001-12-21',
+                    chronicLoad: 3200, 
+                    data: getEmptyWeek(), 
+                    history: [] 
+                }
+            ]);
+
+            const [activeId, setActiveId] = useState(1);
+            const [activeDay, setActiveDay] = useState(0);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [newAthlete, setNewAthlete] = useState({ name: '', cabor: '', dob: '', bb: '', tb: '' });
+
+            const activeAthlete = useMemo(() => 
+                athletes.find(a => a.id === activeId) || athletes[0]
+            , [athletes, activeId]);
+
+            const stats = useMemo(() => {
+                const dailyLoads = activeAthlete.data.map(day => 
+                    day.sessions.reduce((sum, s) => sum + (Number(s.rpe) * Number(s.duration)), 0)
+                );
+                const totalLoad = dailyLoads.reduce((a, b) => a + b, 0);
+                const meanLoad = totalLoad / 7;
+                
+                // Standard Deviation Calculation
+                const variance = dailyLoads.reduce((sum, val) => sum + Math.pow(val - meanLoad, 2), 0) / 7;
+                const sd = Math.sqrt(variance);
+                
+                // Monotony Calculation (Mean / SD)
+                const monotony = sd === 0 ? 0 : meanLoad / sd;
+                
+                // Strain Calculation (Weekly Load * Monotony)
+                const strain = totalLoad * monotony;
+                const acwr = activeAthlete.chronicLoad > 0 ? totalLoad / activeAthlete.chronicLoad : 0;
+                
+                return { dailyLoads, totalLoad, meanLoad, sd, monotony, strain, acwr };
+            }, [activeAthlete]);
+
+            const addAthlete = () => {
+                if (!newAthlete.name) return;
+                const id = Date.now();
+                const age = newAthlete.dob ? new Date().getFullYear() - new Date(newAthlete.dob).getFullYear() : 0;
+                setAthletes([...athletes, { 
+                    ...newAthlete, 
+                    id, 
+                    usia: age,
+                    chronicLoad: 2500, 
+                    data: getEmptyWeek(), 
+                    history: [] 
+                }]);
+                setActiveId(id);
+                setShowAddModal(false);
+                setNewAthlete({ name: '', cabor: '', dob: '', bb: '', tb: '' });
+            };
+
+            const updateSession = (dayIdx, sessionIdx, field, value) => {
+                const updated = athletes.map(a => {
+                    if (a.id === activeId) {
+                        const newData = [...a.data];
+                        newData[dayIdx].sessions[sessionIdx][field] = value;
+                        return { ...a, data: newData };
+                    }
+                    return a;
+                });
+                setAthletes(updated);
+            };
+
+            const addSession = (dayIdx) => {
+                const updated = athletes.map(a => {
+                    if (a.id === activeId) {
+                        const newData = [...a.data];
+                        newData[dayIdx].sessions.push({ name: 'Sesi Baru', rpe: 0, duration: 0 });
+                        return { ...a, data: newData };
+                    }
+                    return a;
+                });
+                setAthletes(updated);
+            };
+
+            const saveHistory = () => {
+                const updated = athletes.map(a => {
+                    if (a.id === activeId) {
+                        const record = {
+                            date: new Date().toLocaleDateString(),
+                            load: stats.totalLoad,
+                            acwr: stats.acwr,
+                            monotony: stats.monotony,
+                            strain: stats.strain
+                        };
+                        return { ...a, history: [record, ...a.history].slice(0, 10) };
+                    }
+                    return a;
+                });
+                setAthletes(updated);
+            };
+
+            const getStatusColor = (val) => {
+                if (val < 0.8) return '#3b82f6'; // Blue
+                if (val <= 1.3) return '#10b981'; // Green
+                if (val <= 1.5) return '#f59e0b'; // Amber
+                return '#ef4444'; // Red
+            };
+
+            const getMonotonyStatus = (val) => {
+                if (val === 0) return { label: 'N/A', color: 'text-slate-400', bg: 'bg-slate-50' };
+                if (val < 1.5) return { label: 'Ideal', color: 'text-emerald-500', bg: 'bg-emerald-50' };
+                if (val <= 2.0) return { label: 'Waspada', color: 'text-amber-500', bg: 'bg-amber-50' };
+                return { label: 'Bahaya', color: 'text-red-500', bg: 'bg-red-50' };
+            };
+
+            return (
+                <div className="min-h-screen pb-20">
+                    {/* Top Navigation */}
+                    <nav className="glass sticky top-0 z-40 px-6 py-4 mb-8">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
+                                    <Icon name="Activity" className="text-white" size={24} />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-black gradient-text tracking-tight uppercase leading-none mb-1">Dashboard Monitoring</h1>
+                                    <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Athlete Workload & recovery Analysis</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                                {athletes.map(a => (
+                                    <button 
+                                        key={a.id}
+                                        onClick={() => setActiveId(a.id)}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                                            activeId === a.id 
+                                            ? 'bg-indigo-600 text-white shadow-md' 
+                                            : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'
+                                        }`}
+                                    >
+                                        {a.name}
+                                    </button>
+                                ))}
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors border border-indigo-100"
+                                >
+                                    <Icon name="Plus" size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-7xl mx-auto px-6">
+                        {/* Profile Card & Key Metrics */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                            {/* Profile Info */}
+                            <div className="lg:col-span-4 bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col justify-between">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-40"></div>
+                                
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-5 mb-8">
+                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-indigo-100">
+                                            {activeAthlete.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-black text-slate-800 leading-tight">{activeAthlete.name}</h2>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Icon name="Trophy" size={12} className="text-indigo-500" />
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{activeAthlete.cabor}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { label: 'Tgl Lahir', val: activeAthlete.dob || '-', icon: 'Calendar' },
+                                            { label: 'Usia', val: `${activeAthlete.usia} Thn`, icon: 'User' },
+                                            { label: 'Berat', val: `${activeAthlete.bb} Kg`, icon: 'Activity' },
+                                            { label: 'Tinggi', val: `${activeAthlete.tb} Cm`, icon: 'TrendingUp' }
+                                        ].map((item, i) => (
+                                            <div key={i} className="bg-slate-50/80 p-3 rounded-2xl border border-slate-100/50">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{item.label}</p>
+                                                <p className="text-xs font-black text-slate-700">{item.val}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-slate-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chronic Load (Ref)</span>
+                                        <span className="text-xs font-black text-indigo-600">{activeAthlete.chronicLoad}</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                        <div 
+                                            className="bg-indigo-500 h-full transition-all duration-500" 
+                                            style={{ width: `${Math.min((stats.totalLoad / activeAthlete.chronicLoad) * 100, 100)}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Core Stats Grid */}
+                            <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Weekly Load */}
+                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm card-glow-indigo">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-500">
+                                            <Icon name="Activity" size={14} />
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weekly Load</p>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-indigo-600 leading-none">{stats.totalLoad}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">A.U</span>
+                                    </div>
+                                    <p className="text-[9px] font-bold text-slate-400 mt-2">Avg: {Math.round(stats.meanLoad)}/hari</p>
+                                </div>
+
+                                {/* ACWR */}
+                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-500">
+                                            <Icon name="TrendingUp" size={14} />
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ACWR Ratio</p>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black leading-none" style={{ color: getStatusColor(stats.acwr) }}>{stats.acwr.toFixed(2)}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Rate</span>
+                                    </div>
+                                    <div className="mt-3 flex items-center px-2 py-0.5 rounded-full w-fit" style={{ backgroundColor: `${getStatusColor(stats.acwr)}15` }}>
+                                        <span className="text-[9px] font-black uppercase tracking-tight" style={{ color: getStatusColor(stats.acwr) }}>
+                                            {stats.acwr <= 1.3 ? 'Ideal Zone' : stats.acwr <= 1.5 ? 'Warning' : 'Danger'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Monotony (Requested Feature) */}
+                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group overflow-hidden">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className={`p-1.5 ${getMonotonyStatus(stats.monotony).bg} rounded-lg ${getMonotonyStatus(stats.monotony).color}`}>
+                                            <Icon name="Activity" size={14} />
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Monotony</p>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className={`text-3xl font-black leading-none ${getMonotonyStatus(stats.monotony).color}`}>{stats.monotony.toFixed(2)}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Idx</span>
+                                    </div>
+                                    <p className="text-[9px] font-bold text-slate-400 mt-2">Threshold: 1.50</p>
+                                    <div className="absolute top-2 right-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-help">
+                                        <Icon name="AlertCircle" size={12} className="text-slate-300" />
+                                    </div>
+                                </div>
+
+                                {/* Strain */}
+                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="p-1.5 bg-red-50 rounded-lg text-red-500">
+                                            <Icon name="AlertCircle" size={14} />
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Strain</p>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className={`text-3xl font-black leading-none ${stats.strain > 4000 ? 'text-red-500' : 'text-slate-800'}`}>
+                                            {Math.round(stats.strain).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-[9px] font-bold text-slate-400 mt-2">Stress Level</p>
+                                </div>
+
+                                {/* Trend Chart Container */}
+                                <div className="col-span-full bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <div>
+                                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Beban Harian vs Monotony Index</h3>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Minggu Berjalan: {new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}</p>
+                                        </div>
+                                        <button onClick={saveHistory} className="btn-primary text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                            <Icon name="Save" size={14} /> Simpan Sesi
+                                        </button>
+                                    </div>
+                                    <div className="h-56 w-full chart-container">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={activeAthlete.data.map((d, i) => ({ 
+                                                name: d.day, 
+                                                load: stats.dailyLoads[i],
+                                                avg: Math.round(stats.meanLoad)
+                                            }))}>
+                                                <defs>
+                                                    <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
+                                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: '800'}} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: '700'}} />
+                                                <Tooltip 
+                                                    cursor={{ stroke: '#e2e8f0', strokeWidth: 2 }}
+                                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '12px' }}
+                                                    itemStyle={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }}
+                                                />
+                                                <Area type="monotone" dataKey="load" stroke="#6366f1" strokeWidth={4} fillOpacity={1} fill="url(#colorLoad)" />
+                                                <ReferenceLine y={stats.meanLoad} stroke="#ef4444" strokeDasharray="5 5" label={{ position: 'right', value: 'MEAN', fill: '#ef4444', fontSize: 9, fontWeight: 900 }} />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <div className="mt-4 flex items-center gap-6 justify-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">Training Load</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-1 bg-red-400"></div>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">Rata-rata Harian</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Middle Section: Input & Alerts */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Daily Session Input */}
+                            <div className="lg:col-span-8">
+                                <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                                    <div className="bg-slate-50/50 p-2.5 border-b border-slate-100 flex gap-1.5 overflow-x-auto no-scrollbar">
+                                        {activeAthlete.data.map((d, i) => (
+                                            <button 
+                                                key={i} 
+                                                onClick={() => setActiveDay(i)}
+                                                className={`px-6 py-3.5 rounded-[1.25rem] text-[11px] font-black transition-all shrink-0 ${
+                                                    activeDay === i 
+                                                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' 
+                                                    : 'text-slate-400 hover:text-slate-600'
+                                                }`}
+                                            >
+                                                {d.day}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="p-10">
+                                        <div className="flex items-center justify-between mb-10">
+                                            <div>
+                                                <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                                                    Sesi {activeAthlete.data[activeDay].day}
+                                                </h3>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Atur volume dan intensitas latihan</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[10px] font-black text-indigo-400 uppercase block tracking-widest mb-1">Load Hari Ini</span>
+                                                <span className="text-3xl font-black text-indigo-600 leading-none tracking-tighter">{stats.dailyLoads[activeDay]}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {activeAthlete.data[activeDay].sessions.map((session, sIdx) => (
+                                                <div key={sIdx} className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end bg-slate-50/50 p-7 rounded-[2rem] border border-slate-100 group hover:bg-white hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-50/50 transition-all duration-300">
+                                                    <div className="md:col-span-6">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block ml-1 tracking-[0.15em]">Nama Aktivitas</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={session.name}
+                                                            onChange={(e) => updateSession(activeDay, sIdx, 'name', e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 px-5 py-4 rounded-[1.25rem] text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block text-center tracking-[0.15em]">RPE (1-10)</label>
+                                                        <input 
+                                                            type="number" 
+                                                            min="0" max="10"
+                                                            value={session.rpe}
+                                                            onChange={(e) => updateSession(activeDay, sIdx, 'rpe', e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 px-5 py-4 rounded-[1.25rem] text-sm font-black text-center text-indigo-600 outline-none focus:border-indigo-500 transition-all" 
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-3">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block text-center tracking-[0.15em]">Durasi (Min)</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={session.duration}
+                                                            onChange={(e) => updateSession(activeDay, sIdx, 'duration', e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 px-5 py-4 rounded-[1.25rem] text-sm font-black text-center text-indigo-600 outline-none focus:border-indigo-500 transition-all" 
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-1 flex justify-center pb-3">
+                                                        <button className="text-slate-300 hover:text-red-500 transition-colors transform hover:scale-110">
+                                                            <Icon name="Trash" size={20} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button 
+                                                onClick={() => addSession(activeDay)}
+                                                className="w-full py-6 border-2 border-dashed border-slate-200 rounded-[2.5rem] text-slate-400 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50/50 hover:border-indigo-200 hover:text-indigo-600 transition-all flex items-center justify-center gap-3 group"
+                                            >
+                                                <div className="p-1 bg-slate-100 rounded-full group-hover:bg-indigo-100 transition-colors">
+                                                    <Icon name="Plus" size={14} />
+                                                </div>
+                                                Tambah Sesi Latihan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Info & Monotony Details */}
+                            <div className="lg:col-span-4 space-y-6">
+                                {/* Analysis Panel */}
+                                <div className="bg-indigo-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
+                                    <div className="absolute bottom-0 right-0 w-40 h-40 bg-white/5 rounded-full -mb-20 -mr-20 blur-3xl"></div>
+                                    <div className="relative z-10">
+                                        <h3 className="text-lg font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                                            <Icon name="Activity" size={18} className="text-indigo-400" /> Insight Analisis
+                                        </h3>
+                                        
+                                        <div className="space-y-6">
+                                            <div className="bg-white/10 p-5 rounded-3xl border border-white/10">
+                                                <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-2">Pesan Monotony</p>
+                                                <p className="text-xs font-bold leading-relaxed text-indigo-50">
+                                                    {stats.monotony > 1.5 
+                                                        ? "Monotony tinggi (>1.5). Kurang variasi beban harian. Pertimbangkan untuk menambah hari istirahat atau sesi intensitas rendah."
+                                                        : "Monotony ideal. Variasi beban latihan harian Anda terjaga dengan baik."}
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-white/10 p-5 rounded-3xl border border-white/10">
+                                                <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-2">Pesan Strain</p>
+                                                <p className="text-xs font-bold leading-relaxed text-indigo-50">
+                                                    {stats.strain > 4000 
+                                                        ? "Strain sangat tinggi! Risiko cedera meningkat signifikan. Waktunya untuk periode Tapering atau Deload."
+                                                        : "Beban regangan (Strain) masih dalam batas toleransi normal."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* History Card */}
+                                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 min-h-[300px]">
+                                    <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                                        <Icon name="TrendingUp" size={16} className="text-indigo-500" /> Log Riwayat
+                                    </h3>
+                                    
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
+                                        {activeAthlete.history.length === 0 ? (
+                                            <div className="py-20 flex flex-col items-center justify-center opacity-20">
+                                                <Icon name="Activity" size={48} />
+                                                <p className="text-[10px] font-black uppercase tracking-widest mt-4">Data Kosong</p>
+                                            </div>
+                                        ) : (
+                                            activeAthlete.history.map((h, i) => (
+                                                <div key={i} className="bg-slate-50/80 p-5 rounded-3xl border border-slate-100 group hover:border-indigo-200 transition-colors">
+                                                    <div className="flex justify-between items-center mb-4">
+                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{h.date}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">LOAD: {h.load}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Monotony</span>
+                                                            <span className={`text-sm font-black ${getMonotonyStatus(h.monotony).color}`}>{h.monotony.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="text-right flex flex-col">
+                                                            <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Strain Score</span>
+                                                            <span className="text-sm font-black text-slate-700">{Math.round(h.strain)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Registration Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-slate-900/60 backdrop-blur-md">
+                            <div className="bg-white w-full max-w-xl rounded-[3rem] p-12 shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                                <h2 className="text-3xl font-black text-slate-800 mb-10 tracking-tight leading-none">Registrasi Profil Atlet</h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                                    <div className="md:col-span-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Nama Lengkap</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Nama Atlet"
+                                            className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-bold"
+                                            value={newAthlete.name}
+                                            onChange={e => setNewAthlete({...newAthlete, name: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Cabang Olahraga</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Contoh: Basket"
+                                            className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none focus:border-indigo-500 font-bold"
+                                            value={newAthlete.cabor}
+                                            onChange={e => setNewAthlete({...newAthlete, cabor: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Tgl Lahir</label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none focus:border-indigo-500 font-bold"
+                                            value={newAthlete.dob}
+                                            onChange={e => setNewAthlete({...newAthlete, dob: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Berat Badan (Kg)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none focus:border-indigo-500 font-bold"
+                                            value={newAthlete.bb}
+                                            onChange={e => setNewAthlete({...newAthlete, bb: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Tinggi Badan (Cm)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl outline-none focus:border-indigo-500 font-bold"
+                                            value={newAthlete.tb}
+                                            onChange={e => setNewAthlete({...newAthlete, tb: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-6">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 py-5 text-slate-400 font-black uppercase tracking-widest text-[11px]"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button 
+                                        onClick={addAthlete}
+                                        className="flex-[2] py-5 btn-primary text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-indigo-100"
+                                    >
+                                        Simpan Profil
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gold-50: #fff9e6;
+  --color-gold-100: #ffefcd;
+  --color-gold-200: #ffd89b;
+  --color-gold-300: #ffbc5d;
+  --color-gold-400: #ff9d2d;
+  --color-gold-500: #ff7e0a;
+  --color-gold-600: #d4af37; /* Professional Gold */
+  --color-gold-700: #a6892c;
+  --color-gold-800: #846d27;
+  --color-gold-900: #6d5a23;
+  --color-gold-950: #3d3111;
+
+  --color-dark-gold: #1a1a12;
+  --color-dashboard-bg: #090909;
+  --color-card-bg: #141414;
+  --color-border-gold: rgba(212, 175, 55, 0.2);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #090909;
+  --foreground: #f5f5f5;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Custom Utilities */
+@layer components {
+  .gold-gradient {
+    background: linear-gradient(135deg, #d4af37 0%, #f2d06b 50%, #d4af37 100%);
+  }
+
+  .gold-border {
+    @apply border border-[rgba(212,175,55,0.3)] hover:border-[rgba(212,175,55,0.6)] transition-colors;
+  }
+
+  .stat-card {
+    @apply bg-[#141414] border border-[rgba(212,175,55,0.1)] rounded-2xl p-6 hover:shadow-[0_0_30px_-10px_rgba(212,175,55,0.3)] transition-all;
+  }
 }
