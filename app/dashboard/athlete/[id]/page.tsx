@@ -2,7 +2,7 @@
 
 import { useLogbookData } from "@/hooks/useLogbookData";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import LoadChart from "@/components/dashboard/LoadChart";
 import StatCard from "@/components/dashboard/StatCard";
 import { calculateAge, getMetricsInsights } from "@/lib/calculations";
@@ -48,6 +48,9 @@ export default function AthleteDetail() {
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [newTestResult, setNewTestResult] = useState({
+    metric: "",
+    target: "",
+    value: "",
     date: new Date().toISOString().split('T')[0]
   });
 
@@ -75,16 +78,18 @@ export default function AthleteDetail() {
   }
 
   // Initializing local states once data is loaded
-  if (!localProfile && athlete) {
-     setLocalProfile(athlete.user);
-     setProfileForm({
+  useEffect(() => {
+    if (athlete && !localProfile) {
+      setLocalProfile(athlete.user);
+      setProfileForm({
         Name: athlete.user.Name,
         Weight: athlete.user.Weight,
         Height: athlete.user.Height,
         Birth_Date: athlete.user.Birth_Date || ""
-     });
-     setTestResults(athlete.tes_fisik || []);
-  }
+      });
+      setTestResults(athlete.tes_fisik || []);
+    }
+  }, [athlete, localProfile]);
 
   const currentProfile = localProfile || athlete.user;
   const age = calculateAge(currentProfile.Birth_Date);

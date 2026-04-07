@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getGoogleSheet } from "@/lib/google-sheets";
+import { getLoadedDoc } from "@/lib/google-sheets";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const { rpe, duration } = await request.json();
 
   try {
-    const doc = await getGoogleSheet();
+    const doc = await getLoadedDoc();
     if (!doc) {
       // If no Google Sheets, just return success (Mock mode)
       return NextResponse.json({ message: "Mock success" });
