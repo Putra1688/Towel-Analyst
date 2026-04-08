@@ -116,7 +116,7 @@ export default function MasterTests() {
       <div className="flex flex-col md:flex-row items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Repositori Penilaian Fisik</p>
-          <h2 className="text-4xl font-extrabold text-white tracking-tighter uppercase leading-[.9]">
+          <h2 className="text-4xl font-extrabold text-white tracking-tigh uppercase leading-[.9]">
             Kamus Tes Utama
           </h2>
         </div>
