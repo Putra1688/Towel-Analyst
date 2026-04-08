@@ -42,7 +42,7 @@ export default function DashboardLayout({
         {/* Top Navbar */}
         <nav className="sticky top-0 z-40 bg-dashboard-bg/80 backdrop-blur-xl border-b border-white/5 py-4 px-6 md:px-8 flex items-center justify-between shadow-2xl">
           <div>
-             <p className="text-[10px] font-black uppercase tracking-[.4em] text-zinc-600 leading-none mb-1">Authenticated Session</p>
+             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 leading-none mb-1">Authenticated Session</p>
              <h2 className="text-sm font-bold text-white uppercase tracking-widest">{session.user?.name}</h2>
           </div>
 

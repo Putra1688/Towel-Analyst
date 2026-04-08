@@ -31,7 +31,7 @@ export default function StatusPieChart({ data }: StatusPieChartProps) {
   return (
     <div className="stat-card flex flex-col h-full bg-[#111] border-white/5 hover:border-gold-600/30">
       <div className="mb-4">
-        <p className="text-[10px] font-black uppercase tracking-[.3em] text-gold-600">Body Composition</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Body Composition</p>
         <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Sensus Kebugaran Tim</h3>
       </div>
       

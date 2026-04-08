@@ -96,7 +96,7 @@ export default function DashboardPage() {
     <div className="space-y-6 md:space-y-8 animate-in slide-in-from-bottom duration-700 pb-8">
       <div className="flex flex-col md:flex-row items-end justify-between gap-4">
         <div className="space-y-1 w-full md:w-auto">
-          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[.4em] text-zinc-600">Performance Status Monitoring</p>
+          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-600">Performance Status Monitoring</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter uppercase leading-[.9]">
             My Command Center
           </h2>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         
         <div className="stat-card space-y-8">
            <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-black uppercase tracking-[.3em] text-gold-600">Body Stats</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Body Stats</p>
               <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Diagnostic Summary</h3>
            </div>
 
