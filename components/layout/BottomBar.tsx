@@ -19,15 +19,15 @@ export default function BottomBar({ role }: BottomBarProps) {
   const pathname = usePathname();
 
   const coachLinks = [
-    { name: "Home", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Athletes", href: "/dashboard/athlete", icon: Users },
-    { name: "Tests", href: "/dashboard/tests", icon: Settings },
+    { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Atlet", href: "/dashboard/athlete", icon: Users },
+    { name: "Tes", href: "/dashboard/tests", icon: Settings },
   ];
 
   const clientLinks = [
-    { name: "Home", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Assess", href: "/dashboard/assessment", icon: ClipboardCheck },
-    { name: "Profile", href: "/dashboard/profile", icon: History },
+    { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Nilai", href: "/dashboard/assessment", icon: ClipboardCheck },
+    { name: "Profil", href: "/dashboard/profile", icon: History },
   ];
 
   const links = role === "coach" ? coachLinks : clientLinks;

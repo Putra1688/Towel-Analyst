@@ -28,7 +28,7 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return [];
     return [...data].reverse().slice(-14).map(d => ({
-      name: new Date(d.Date).toLocaleDateString('en-US', { weekday: 'short' }),
+      name: new Date(d.Date).toLocaleDateString('id-ID', { weekday: 'short' }),
       load: d.load,
     }));
   }, [data]);
@@ -36,7 +36,7 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
   if (!isMounted) {
     return (
       <div className="w-full h-full min-h-[300px] bg-white/5 animate-pulse rounded-3xl border border-white/5 flex items-center justify-center">
-         <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Initializing Analytics...</p>
+         <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Menginisialisasi Analitik...</p>
       </div>
     );
   }
@@ -45,11 +45,11 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
     <div className="flex-1 w-full h-full min-h-[300px] flex flex-col">
       <div className="mb-8 flex flex-col gap-1">
         <p className="text-[10px] font-extrabold uppercase tracking-[.3em] text-gold-600/60">
-          Workload Metrics
+          Metrik Beban Kerja
         </p>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white tracking-widest uppercase">
-            {title || "Load Analytics"}
+            {title || "Analisis Beban"}
           </h2>
           <div className="flex items-center gap-4">
              <div className="flex items-center gap-2">

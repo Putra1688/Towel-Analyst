@@ -115,9 +115,9 @@ export default function MasterTests() {
     <div className="space-y-8 animate-in fade-in duration-700 relative">
       <div className="flex flex-col md:flex-row items-end justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Physical Assessment Repository</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Repositori Penilaian Fisik</p>
           <h2 className="text-4xl font-extrabold text-white tracking-tighter uppercase leading-[.9]">
-            Master Test Dictionary
+            Kamus Tes Utama
           </h2>
         </div>
         <button
@@ -125,14 +125,14 @@ export default function MasterTests() {
           className="px-8 py-4 bg-gold-600 hover:bg-gold-500 text-zinc-950 font-black rounded-2xl flex items-center gap-3 transition-all transform active:scale-95 shadow-[0_0_20px_-5px_rgba(212,175,55,0.4)]"
         >
           <Plus className="w-5 h-5" />
-          ADD NEW TEST
+          TAMBAH TES BARU
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 bg-white/5 border border-white/5 rounded-3xl group hover:border-gold-600/20 transition-all flex items-center justify-between">
           <div className="space-y-2">
-            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Total Matrix</p>
+            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Total Matriks</p>
             <p className="text-3xl font-black text-white">{tests.length}</p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center">
@@ -145,7 +145,7 @@ export default function MasterTests() {
             <Search className="absolute left-4 w-5 h-5 text-zinc-600 group-focus-within:text-gold-600 transition-colors" />
             <input
               type="text"
-              placeholder="Search test name or category..."
+              placeholder="Cari nama tes atau kategori..."
               className="w-full bg-dashboard-bg border border-white/5 focus:border-gold-600/30 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white outline-none transition-all placeholder:text-zinc-700"
             />
           </div>
@@ -185,7 +185,7 @@ export default function MasterTests() {
                 className="flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-black text-zinc-600 hover:text-rose-500 uppercase tracking-widest transition-all"
               >
                 <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Retire</span>
+                <span className="hidden sm:inline">Hapus</span>
               </button>
             </div>
           </div>
@@ -308,9 +308,9 @@ export default function MasterTests() {
                 <Trash2 className="w-10 h-10 text-rose-500" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Retire Assessment?</h3>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Hapus Penilaian?</h3>
                 <p className="text-sm text-zinc-500">
-                  You are about to remove <span className="text-white font-bold">{testToDelete?.Name}</span> from the master repository. This action is destructive.
+                  Anda akan menghapus <span className="text-white font-bold">{testToDelete?.Name}</span> dari repositori utama. Tindakan ini permanen.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -318,7 +318,7 @@ export default function MasterTests() {
                   onClick={() => setIsDeleteModalOpen(false)}
                   className="py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black text-zinc-500 uppercase tracking-widest transition-all"
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   onClick={handleDeleteTest}
@@ -326,7 +326,7 @@ export default function MasterTests() {
                   className="py-4 bg-rose-600 hover:bg-rose-500 rounded-2xl text-xs font-black text-white uppercase tracking-widest transition-all shadow-lg shadow-rose-600/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {isDeleting ? "DELETING..." : "Confirm Delete"}
+                  {isDeleting ? "MENGHAPUS..." : "Konfirmasi Hapus"}
                 </button>
               </div>
             </div>

@@ -21,15 +21,15 @@ export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
 
   const coachLinks = [
-    { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Ringkasan", href: "/dashboard", icon: LayoutDashboard },
     { name: "Manajemen Atlet", href: "/dashboard/athlete", icon: Users },
-    { name: "Master Tests", href: "/dashboard/tests", icon: Settings },
+    { name: "Master Tes", href: "/dashboard/tests", icon: Settings },
   ];
 
   const clientLinks = [
-    { name: "My Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "My Assessment", href: "/dashboard/assessment", icon: ClipboardCheck },
-    { name: "Profile & History", href: "/dashboard/profile", icon: History },
+    { name: "Dashboard Saya", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Penilaian Saya", href: "/dashboard/assessment", icon: ClipboardCheck },
+    { name: "Profil & Riwayat", href: "/dashboard/profile", icon: History },
   ];
 
   const links = role === "coach" ? coachLinks : clientLinks;
@@ -78,7 +78,7 @@ export default function Sidebar({ role }: SidebarProps) {
             <UserCircle className="w-6 h-6 text-zinc-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest leading-none mb-1">System Mode</p>
+            <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest leading-none mb-1">Mode Sistem</p>
             <p className="text-xs font-bold text-white uppercase truncate">{role}</p>
           </div>
         </div>

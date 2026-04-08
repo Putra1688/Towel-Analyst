@@ -62,8 +62,8 @@ export default function LogbookModal({ isOpen, onClose, onSuccess }: LogbookModa
                 <History className="w-6 h-6 text-gold-600" />
               </div>
               <div className="space-y-1">
-                 <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Daily Logbook</h3>
-                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Record training intensity</p>
+                 <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Logbook Harian</h3>
+                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Catat intensitas latihan</p>
               </div>
             </div>
             <button 
@@ -78,7 +78,7 @@ export default function LogbookModal({ isOpen, onClose, onSuccess }: LogbookModa
             {/* RPE Selector */}
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Rate of Perceived Exertion (RPE)</label>
+                <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Tingkat Persepsi Beban (RPE)</label>
                 <div className="px-3 py-1 bg-gold-600/20 border border-gold-600/30 text-gold-600 text-xs font-black rounded-lg">
                   Level {rpe}
                 </div>
@@ -93,15 +93,15 @@ export default function LogbookModal({ isOpen, onClose, onSuccess }: LogbookModa
                 className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-gold-600"
               />
               <div className="flex items-center justify-between text-[10px] text-zinc-600 font-black uppercase tracking-widest px-1">
-                 <span>Rest</span>
-                 <span>Moderate</span>
-                 <span>Max Effort</span>
+                 <span>Istirahat</span>
+                 <span>Sedang</span>
+                 <span>Usaha Maksimal</span>
               </div>
             </div>
 
             {/* Duration Input */}
             <div className="space-y-4">
-               <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Training Duration (Minutes)</label>
+               <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Durasi Latihan (Menit)</label>
                <div className="relative group">
                   <Clock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-gold-600 transition-colors" />
                   <input 
@@ -111,14 +111,14 @@ export default function LogbookModal({ isOpen, onClose, onSuccess }: LogbookModa
                     className="w-full bg-[#111] border border-white/5 rounded-[24px] py-6 pl-16 pr-6 text-2xl font-black text-white outline-none focus:border-gold-600/30 transition-all placeholder:text-zinc-800"
                     placeholder="60"
                   />
-                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-700 uppercase tracking-widest">Minutes</span>
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-700 uppercase tracking-widest">Menit</span>
                </div>
             </div>
 
             {/* Summary Preview */}
             <div className="p-6 bg-gold-600/10 border border-gold-600/20 rounded-[32px] flex items-center justify-between">
                <div className="space-y-1">
-                  <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest leading-none">Calculated Workload</p>
+                  <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest leading-none">Beban Kerja Terhitung</p>
                   <h4 className="text-3xl font-black text-white uppercase tracking-tighter">{rpe * duration}</h4>
                </div>
                <div className="p-4 bg-gold-600 rounded-2xl shadow-xl shadow-gold-600/20">
@@ -136,7 +136,7 @@ export default function LogbookModal({ isOpen, onClose, onSuccess }: LogbookModa
               ) : (
                 <>
                   <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  SUBMIT DAILY PERFORMANCE
+                  KIRIM PERFORMA HARIAN
                 </>
               )}
             </button>

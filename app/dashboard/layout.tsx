@@ -25,7 +25,7 @@ export default function DashboardLayout({
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-dashboard-bg gap-4">
         <Loader2 className="w-12 h-12 text-gold-600 animate-spin" />
-        <p className="text-sm font-bold uppercase tracking-[.3em] text-zinc-600">Loading Workspace</p>
+        <p className="text-sm font-bold uppercase tracking-[.3em] text-zinc-600">Memuat Ruang Kerja</p>
       </div>
     );
   }
@@ -42,14 +42,14 @@ export default function DashboardLayout({
         {/* Top Navbar */}
         <nav className="sticky top-0 z-40 bg-dashboard-bg/80 backdrop-blur-xl border-b border-white/5 py-4 px-6 md:px-8 flex items-center justify-between shadow-2xl">
           <div>
-             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 leading-none mb-1">Authenticated Session</p>
+             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 leading-none mb-1">Sesi Terautentikasi</p>
              <h2 className="text-sm font-bold text-white uppercase tracking-widest">{session.user?.name}</h2>
           </div>
 
           <div className="flex items-center gap-3 md:gap-6">
-            <div className="hidden sm:block px-4 py-2 bg-gold-600/10 border border-gold-600/20 text-gold-600 text-[10px] font-black rounded-full uppercase tracking-widest">
-              {userRole} Mode
-            </div>
+             <div className="hidden sm:block px-4 py-2 bg-gold-600/10 border border-gold-600/20 text-gold-600 text-[10px] font-black rounded-full uppercase tracking-widest">
+               Mode {userRole === "coach" ? "Pelatih" : "Atlet"}
+             </div>
             <button
               onClick={() => signOut()}
               className="p-3 bg-white/5 hover:bg-rose-500/20 text-zinc-500 hover:text-rose-500 border border-white/5 rounded-xl transition-all active:scale-95 group"

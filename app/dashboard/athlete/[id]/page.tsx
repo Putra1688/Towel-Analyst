@@ -240,7 +240,7 @@ export default function AthleteDetail() {
                      <div className="p-2 bg-white/10 rounded-xl">
                         <Zap className="w-5 h-5 text-gold-600 fill-gold-600" />
                      </div>
-                     <h3 className="text-lg font-black uppercase tracking-tighter">Insight Analisis</h3>
+                     <h3 className="text-lg font-black uppercase tracking-tighter">Wawasan Analisis</h3>
                   </div>
                   <div className="space-y-6 relative z-10">
                      <div className="space-y-2">
@@ -258,18 +258,18 @@ export default function AthleteDetail() {
             {/* Right Column */}
             <div className="lg:col-span-3 space-y-8">
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <StatCard title="WEEKLY LOAD" value={`${athlete.metrics.weeklyLoad} A.U`} icon={Activity} description={`Avg: ${avgMonthlyLoad}/hr`} variant="gold" />
-                  <StatCard title="ACWR RATIO" value={athlete.metrics.acwr} icon={TrendingUp} description="Ratio Metric" />
-                  <StatCard title="MONOTONY" value={athlete.metrics.monotony} icon={Zap} description="Intensity Mix" />
-                  <StatCard title="STRAIN" value={athlete.metrics.strain} icon={Trophy} description="Overall Stress" />
+                  <StatCard title="BEBAN MINGGUAN" value={`${athlete.metrics.weeklyLoad} A.U`} icon={Activity} description={`Rata-rata: ${avgMonthlyLoad}/hari`} variant="gold" />
+                  <StatCard title="RASIO ACWR" value={athlete.metrics.acwr} icon={TrendingUp} description="Metrik Rasio" />
+                  <StatCard title="MONOTONI" value={athlete.metrics.monotony} icon={Zap} description="Variasi Intensitas" />
+                  <StatCard title="STRAIN" value={athlete.metrics.strain} icon={Trophy} description="Total Stress" />
                </div>
 
                {/* Physical Assessment Results Section */}
                <div className="space-y-6">
                   <div className="flex items-center justify-between px-2">
-                     <h3 className="text-lg font-bold text-white uppercase tracking-widest border-l-4 border-gold-600 pl-4">Physical Test Matrix</h3>
+                     <h3 className="text-lg font-bold text-white uppercase tracking-widest border-l-4 border-gold-600 pl-4">Matriks Tes Fisik</h3>
                      <button onClick={() => setIsTestModalOpen(true)} className="flex items-center gap-2 text-[10px] font-black text-gold-600 hover:text-white uppercase tracking-widest transition-all">
-                        <Plus className="w-4 h-4" /> Add Result
+                        <Plus className="w-4 h-4" /> Tambah Hasil
                      </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -277,7 +277,7 @@ export default function AthleteDetail() {
                         <div key={idx} className="p-5 bg-white/5 border border-white/5 rounded-3xl group hover:border-gold-600/30 transition-all flex flex-col gap-4">
                            <div className="flex items-center justify-between">
                               <div className="space-y-0.5">
-                                 <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{test.Category || "Physical"}</p>
+                                 <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{test.Category || "Fisik"}</p>
                                  <h4 className="text-sm font-bold text-white uppercase truncate max-w-[120px]">{test.Metric}</h4>
                               </div>
                               <div className={`p-2 rounded-lg ${test.achievement >= 100 ? "bg-emerald-500/10 text-emerald-500" : "bg-gold-600/10 text-gold-600"}`}>
@@ -286,11 +286,11 @@ export default function AthleteDetail() {
                            </div>
                            <div className="flex items-baseline gap-2">
                               <span className="text-xl font-black text-white">{test.Value}</span>
-                              <span className="text-[9px] font-black text-zinc-600 uppercase">Goal: {test.Target}</span>
+                              <span className="text-[9px] font-black text-zinc-600 uppercase">Target: {test.Target}</span>
                            </div>
                            <div className="space-y-1.5">
                               <div className="flex items-center justify-between text-[7px] font-black text-zinc-600 uppercase tracking-widest">
-                                 <span>Achievement</span>
+                                 <span>Pencapaian</span>
                                  <span>{test.achievement}%</span>
                               </div>
                               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
@@ -407,7 +407,7 @@ export default function AthleteDetail() {
                         </div>
                         <div className="grid grid-cols-2 gap-6">
                            <div className="space-y-3">
-                              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Target (Goal)</p>
+                              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Target (Sasaran)</p>
                               <input type="number" value={newTestResult.target} onChange={(e) => setNewTestResult({ ...newTestResult, target: e.target.value })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all" />
                            </div>
                            <div className="space-y-3">

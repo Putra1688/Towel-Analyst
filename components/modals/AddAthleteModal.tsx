@@ -95,8 +95,8 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                 <UserPlus className="w-5 h-5 md:w-6 md:h-6 text-gold-600" />
               </div>
               <div className="space-y-1">
-                 <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter leading-none">Register Athlete</h3>
-                 <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">New roster deployment</p>
+                 <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter leading-none">Daftar Atlet</h3>
+                 <p className="text-[8px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Penyebaran skuad baru</p>
               </div>
             </div>
             <button 
@@ -113,8 +113,8 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                   <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-emerald-500" />
                </div>
                <div className="text-center space-y-1 md:space-y-2">
-                  <h4 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">Athlete Registered!</h4>
-                  <p className="text-xs text-zinc-500">The credentials have been activated.</p>
+                  <h4 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">Atlet Terdaftar!</h4>
+                  <p className="text-xs text-zinc-500">Kredensial telah diaktifkan.</p>
                </div>
             </div>
           ) : (
@@ -122,7 +122,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
               {/* Credentials Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Username</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Nama Pengguna</label>
                   <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-gold-600 transition-colors" />
                     <input 
@@ -137,7 +137,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Password</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Kata Sandi</label>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-gold-600 transition-colors" />
                     <input 
@@ -156,7 +156,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
               {/* Personal Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Full Name</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Nama Lengkap</label>
                   <div className="relative group">
                     <input 
                       type="text"
@@ -165,12 +165,12 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                       value={formData.name}
                       onChange={handleChange}
                       className="w-full bg-white/5 border border-white/5 rounded-xl md:rounded-2xl py-3 md:py-4 px-5 md:px-6 text-xs md:text-sm text-white outline-none focus:border-gold-600/30 transition-all"
-                      placeholder="Athlete's full name"
+                      placeholder="Nama lengkap atlet"
                     />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Cabor (Sports Branch)</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Cabor (Cabang Olahraga)</label>
                   <div className="relative group">
                     <input 
                       type="text"
@@ -179,7 +179,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                       value={formData.cabor}
                       onChange={handleChange}
                       className="w-full bg-white/5 border border-white/5 rounded-xl md:rounded-2xl py-3 md:py-4 px-5 md:px-6 text-xs md:text-sm text-white outline-none focus:border-gold-600/30 transition-all"
-                      placeholder="e.g., Football, Swimming..."
+                      placeholder="misal: Sepak Bola, Renang..."
                     />
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
               {/* Stats Section */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Weight (kg)</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Berat (kg)</label>
                   <div className="relative group">
                     <Weight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                     <input 
@@ -203,7 +203,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Height (cm)</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Tinggi (cm)</label>
                   <div className="relative group">
                     <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                     <input 
@@ -218,7 +218,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                   </div>
                 </div>
                 <div className="space-y-1.5 col-span-2 md:col-span-1">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Birth Date</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-2">Tanggal Lahir</label>
                   <div className="relative group">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                     <input 
@@ -243,7 +243,7 @@ export default function AddAthleteModal({ isOpen, onClose }: AddAthleteModalProp
                 ) : (
                   <>
                     <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
-                    <span className="text-xs md:text-sm">INITIALIZE ROSTER</span>
+                    <span className="text-xs md:text-sm">INISIALISASI SKUAD</span>
                   </>
                 )}
               </button>

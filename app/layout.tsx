@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Towell Analyst | Sport Monitoring",
-  description: "Advanced athlete performance monitoring and load analysis.",
+  title: "Towell Analyst | Monitoring Olahraga",
+  description: "Pemantauan performa atlet tingkat lanjut dan analisis beban latihan.",
 };
 
 export default function RootLayout({

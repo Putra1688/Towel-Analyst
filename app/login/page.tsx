@@ -27,12 +27,12 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError("Email atau kata sandi salah");
       } else {
         router.push("/dashboard");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export default function LoginPage() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-sm transition-all">
             Towell <span className="text-gold-600">Analyst</span>
           </h1>
-          <p className="text-zinc-400 text-[10px] md:text-sm uppercase tracking-widest md:tracking-normal">Professional Load Monitoring</p>
+          <p className="text-zinc-400 text-[10px] md:text-sm uppercase tracking-widest md:tracking-normal">Pemantauan Beban Profesional</p>
         </div>
 
         {/* Login Card */}
@@ -66,7 +66,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-1.5 md:space-y-2">
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Email Address</label>
+              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Alamat Email</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-500 group-focus-within:text-gold-600 transition-colors" />
                 <input
@@ -81,7 +81,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5 md:space-y-2">
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Password</label>
+              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Kata Sandi</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-zinc-500 group-focus-within:text-gold-600 transition-colors" />
                 <input
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span className="text-xs md:text-sm">ENTER DASHBOARD</span>
+                  <span className="text-xs md:text-sm">MASUK KE DASHBOARD</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -112,14 +112,14 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
-            <p className="text-[10px] text-zinc-600 text-center uppercase tracking-[0.2em] font-bold">Account Access</p>
+            <p className="text-[10px] text-zinc-600 text-center uppercase tracking-[0.2em] font-bold">Akses Akun</p>
             <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
                <p className="text-[10px] text-zinc-400 text-center leading-relaxed">
                   Log in menggunakan format email (mengandung @). Sistem akan mencocokkan ID Anda di spreadsheet secara otomatis.
                </p>
                <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Live Database Active</span>
+                  <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Basis Data Aktif</span>
                </div>
             </div>
           </div>

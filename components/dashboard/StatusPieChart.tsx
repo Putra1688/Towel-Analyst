@@ -22,7 +22,7 @@ export default function StatusPieChart({ data }: StatusPieChartProps) {
   const chartData = [
     { name: "Optimal", value: data?.Optimal || 0, color: "#d4af37" }, // Gold
     { name: "Kurang", value: data?.Kurang || 0, color: "#3f3f46" },  // Zinc-600
-    { name: "Overweight", value: data?.Overweight || 0, color: "#a1a1aa" }, // Zinc-400
+    { name: "Berlebih", value: data?.Overweight || 0, color: "#a1a1aa" }, // Zinc-400
   ];
 
   // If no data at all, show empty state
@@ -31,14 +31,14 @@ export default function StatusPieChart({ data }: StatusPieChartProps) {
   return (
     <div className="stat-card flex flex-col h-full bg-[#111] border-white/5 hover:border-gold-600/30">
       <div className="mb-4">
-        <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Body Composition</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Komposisi Tubuh</p>
         <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Sensus Kebugaran Tim</h3>
       </div>
       
       <div className="flex-1 min-h-[400px] w-full relative">
         {!hasData ? (
           <div className="absolute inset-0 flex items-center justify-center opacity-20">
-             <p className="text-[10px] font-black uppercase tracking-widest">No data available</p>
+             <p className="text-[10px] font-black uppercase tracking-widest">Data tidak tersedia</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>

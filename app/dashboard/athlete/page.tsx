@@ -23,15 +23,15 @@ export default function AthleteManagement() {
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div className="space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 leading-none">Management Console</p>
-          <h2 className="text-3xl font-extrabold text-white tracking-tighter uppercase">Squad Roster</h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 leading-none">Konsol Manajemen</p>
+          <h2 className="text-3xl font-extrabold text-white tracking-tighter uppercase">Daftar Skuad</h2>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-6 py-3 bg-gold-600 hover:bg-gold-500 text-zinc-950 text-xs font-black rounded-2xl transition-all active:scale-95 shadow-lg shadow-gold-600/20"
         >
           <Plus className="w-4 h-4" />
-          ADD NEW ATHLETE
+          TAMBAH ATLET BARU
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export default function AthleteManagement() {
                   <div className="w-1 h-1 rounded-full bg-zinc-800 shrink-0" />
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <p className="text-[8px] md:text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Active</p>
+                    <p className="text-[8px] md:text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Aktif</p>
                   </div>
                 </div>
               </div>
@@ -64,11 +64,11 @@ export default function AthleteManagement() {
 
             <div className="flex items-center justify-between md:justify-end gap-2 md:gap-4 mt-3 md:mt-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-white/5">
               <div className="px-3 py-2 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center min-w-[60px] md:min-w-[80px]">
-                <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Weight</p>
+                <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Berat</p>
                 <span className="text-[10px] md:text-xs font-black text-white uppercase">{athlete.user.Weight}kg</span>
               </div>
               <div className="px-3 py-2 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center min-w-[60px] md:min-w-[80px]">
-                <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Achieve</p>
+                <p className="text-[7px] md:text-[8px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1">Capaian</p>
                 <span className="text-[10px] md:text-xs font-black text-gold-600 uppercase">{athlete.avgAchievement}%</span>
               </div>
               <div className={`px-3 py-2 rounded-xl border flex flex-col items-center min-w-[60px] md:min-w-[80px] ${athlete.metrics.acwr > 1.5 ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"}`}>

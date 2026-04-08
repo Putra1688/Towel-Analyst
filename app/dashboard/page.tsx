@@ -36,28 +36,28 @@ export default function DashboardPage() {
         {/* Coach Overview: Top Stats */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard
-            title="Total Athletes"
+            title="Total Atlet"
             value={data?.summary?.length || 0}
             icon={Users}
             variant="gold"
           />
           <StatCard
-            title="Avg Team Achievement"
+            title="Rata-rata Pencapaian Tim"
             value={`${data?.teamAvgAchievement || 0}%`}
             icon={Target}
-            description="Physical test target reached"
+            description="Target tes fisik tercapai"
           />
           <StatCard
-             title="Team ACWR Index"
+             title="Indeks ACWR Tim"
              value={data?.summary?.length > 0 ? (data.summary.reduce((acc: any, cur: any) => acc + cur.metrics.acwr, 0) / data.summary.length).toFixed(2) : 0}
              icon={Activity}
-             description="Squad readiness index"
+             description="Indeks kesiapan skuad"
           />
           <StatCard
-            title="High Risk Alerts"
+            title="Peringatan Risiko Tinggi"
             value={data?.alerts?.length || 0}
             icon={AlertTriangle}
-            description="Critical attention needed"
+            description="Perhatian kritis diperlukan"
           />
         </div>
 
@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
            <div className="lg:col-span-2 space-y-6">
                <div className="flex items-center justify-between mb-4 px-2">
-                  <h3 className="text-lg md:text-xl font-bold text-white uppercase tracking-widest pl-2 border-l-4 border-rose-500">Critical Monitor</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-white uppercase tracking-widest pl-2 border-l-4 border-rose-500">Monitor Kritis</h3>
                </div>
               <div className="flex flex-col gap-4">
                  {data?.alerts
@@ -80,7 +80,7 @@ export default function DashboardPage() {
                  {(!data?.alerts || data.alerts.length === 0) && (
                     <div className="p-12 bg-white/5 border border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-30">
                        <ShieldCheck className="w-12 h-12 mb-4 text-emerald-500" />
-                       <p className="text-[10px] uppercase font-black tracking-widest">No critical alerts detected in team</p>
+                       <p className="text-[10px] uppercase font-black tracking-widest">Tidak ada peringatan kritis terdeteksi dalam tim</p>
                     </div>
                  )}
               </div>
@@ -95,38 +95,38 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 md:space-y-8 animate-in slide-in-from-bottom duration-700 pb-8">
       <div className="flex flex-col md:flex-row items-end justify-between gap-4">
-        <div className="space-y-1 w-full md:w-auto">
-          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-600">Performance Status Monitoring</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter uppercase leading-[.9]">
-            My Command Center
-          </h2>
-        </div>
-        <div className="hidden md:flex px-6 py-3 bg-white/5 border border-white/5 rounded-2xl items-center gap-3">
-           <ShieldCheck className="w-4 h-4 text-emerald-500" />
-           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Coach Monitored</p>
-        </div>
+         <div className="space-y-1 w-full md:w-auto">
+           <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-600">Pemantauan Status Performa</p>
+           <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter uppercase leading-[.9]">
+             Pusat Komando Saya
+           </h2>
+         </div>
+         <div className="hidden md:flex px-6 py-3 bg-white/5 border border-white/5 rounded-2xl items-center gap-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Dipantau Pelatih</p>
+         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard
-          title="My Weekly Load"
+          title="Beban Mingguan Saya"
           value={data?.metrics?.weeklyLoad || 0}
           icon={Activity}
           variant="gold"
         />
         <StatCard
-          title="My Achievement"
+          title="Pencapaian Saya"
           value={`${data?.avgAchievement || 0}%`}
           icon={Target}
-          description="Personal goal progress"
+          description="Kemajuan target pribadi"
         />
         <StatCard
-          title="Monotony"
+          title="Monotoni"
           value={data?.metrics?.monotony || 0}
           icon={Zap}
         />
         <StatCard
-          title="ACWR Ratio"
+          title="Rasio ACWR"
           value={data?.metrics?.acwr || 0}
           icon={ShieldCheck}
           variant={data?.metrics?.acwr < 0.8 || data?.metrics?.acwr > 1.3 ? "default" : "gold"}
@@ -135,21 +135,21 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <LoadChart data={data?.metrics?.dailyLoads || []} title="My Performance Trend" />
+          <LoadChart data={data?.metrics?.dailyLoads || []} title="Tren Performa Saya" />
         </div>
         
-        <div className="stat-card space-y-8">
-           <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Body Stats</p>
-              <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Diagnostic Summary</h3>
-           </div>
+         <div className="stat-card space-y-8">
+            <div className="flex flex-col gap-1">
+               <p className="text-[10px] font-black uppercase tracking-widest text-gold-600">Statistik Tubuh</p>
+               <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Ringkasan Diagnostik</h3>
+            </div>
 
            <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center space-y-1 group hover:border-gold-600/30 transition-all">
-                <p className="text-[9px] uppercase tracking-widest text-zinc-600 font-bold">BMI Index</p>
+                <p className="text-[9px] uppercase tracking-widest text-zinc-600 font-bold">Indeks BMI</p>
                 <p className="text-2xl font-black text-white leading-none">{data?.bmi}</p>
               </div>
-              <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center space-y-1 group hover:border-gold-600/30 transition-all">
+               <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center space-y-1 group hover:border-gold-600/30 transition-all">
                 <p className="text-[9px] uppercase tracking-widest text-zinc-600 font-bold">Status</p>
                 <p className="text-xs font-black text-gold-600 leading-none uppercase">{data?.bmiStatus}</p>
               </div>
