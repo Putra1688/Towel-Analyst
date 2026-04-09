@@ -37,43 +37,49 @@ export function calculateComparison(current: number, previous: number) {
    };
 }
 
-export function aggregateByTimeline(data: any[], timeline: 'daily' | 'weekly' | 'monthly', dateField: string = 'Date') {
-   const groups: Record<string, any> = {};
+export function aggregateByTimeline(
+  data: any[], 
+  timeline: 'daily' | 'weekly' | 'monthly', 
+  dateField: string = 'Date',
+  type: 'sum' | 'avg' = 'sum'
+) {
+  const groups: Record<string, any> = {};
 
-   data.forEach(item => {
-      const date = new Date(item[dateField]);
-      let key = '';
-      
-      if (timeline === 'daily') {
-         key = date.toISOString().split('T')[0];
-      } else if (timeline === 'weekly') {
-         // Get the start of the week (Monday)
-         const day = date.getDay() || 7;
-         const start = new Date(date);
-         start.setHours(0,0,0,0);
-         start.setDate(date.getDate() - day + 1);
-         key = start.toISOString().split('T')[0];
-      } else {
-         // Monthly
-         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      }
+  data.forEach(item => {
+    if (!item[dateField]) return;
+    const date = new Date(item[dateField]);
+    if (isNaN(date.getTime())) return;
 
-      if (!groups[key]) {
-         groups[key] = { label: key, sum: 0, count: 0 };
-      }
-      
-      const val = item.achievement || item.Achievement || item.value || item.Value || calculateDailyLoad(item) || 0;
-      groups[key].sum += val;
-      groups[key].count += 1;
-   });
+    let key = '';
+    
+    if (timeline === 'daily') {
+      key = date.toISOString().split('T')[0];
+    } else if (timeline === 'weekly') {
+      const day = date.getDay() || 7;
+      const start = new Date(date);
+      start.setHours(0,0,0,0);
+      start.setDate(date.getDate() - day + 1);
+      key = `Week of ${start.toISOString().split('T')[0]}`;
+    } else {
+      key = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    }
 
-   return Object.values(groups)
-      .map(g => ({
-         label: g.label,
-         value: g.count > 0 ? Math.round(g.sum / g.count) : 0,
-         count: g.count
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+    if (!groups[key]) {
+      groups[key] = { label: key, sum: 0, count: 0, timestamp: date.getTime() };
+    }
+    
+    const val = item.achievement || item.Achievement || item.value || item.Value || calculateDailyLoad(item) || 0;
+    groups[key].sum += val;
+    groups[key].count += 1;
+  });
+
+  return Object.values(groups)
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .map(g => ({
+      label: g.label,
+      value: type === 'sum' ? Math.round(g.sum) : (g.count > 0 ? Math.round(g.sum / g.count) : 0),
+      count: g.count
+    }));
 }
 
 export function getRadarData(masterTests: any[], results: any[]) {

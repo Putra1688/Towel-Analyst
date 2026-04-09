@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -26,23 +26,23 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
 
   // Format data for Recharts (reverse to chronological order)
   const chartData = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    return [...data].reverse().slice(-14).map(d => ({
-      name: new Date(d.Date).toLocaleDateString('id-ID', { weekday: 'short' }),
-      load: d.load,
+    if (!data || !Array.isArray(data) || data.length === 0) return [];
+    return data.map(d => ({
+      name: (d.label || '').length > 10 ? d.label.substring(0, 5) + "..." : (d.label || 'N/A'),
+      load: d.value || 0,
     }));
   }, [data]);
 
   if (!isMounted) {
     return (
-      <div className="w-full h-full min-h-[300px] bg-white/5 animate-pulse rounded-3xl border border-white/5 flex items-center justify-center">
+      <div className="w-full h-full min-h-[350px] bg-white/5 animate-pulse rounded-3xl border border-white/5 flex items-center justify-center">
          <p className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">Menginisialisasi Analitik...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 w-full h-full min-h-[300px] flex flex-col">
+    <div className="flex-1 w-full h-full min-h-[350px] flex flex-col">
       <div className="mb-8 flex flex-col gap-1">
         <p className="text-[10px] font-extrabold uppercase tracking-[.3em] text-gold-600/60">
           Metrik Beban Kerja
@@ -61,8 +61,8 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
         {subtitle && <p className="text-xs text-zinc-500 font-medium">{subtitle}</p>}
       </div>
 
-      <div className="flex-1 w-full min-h-[250px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 w-full min-h-[300px]">
+        <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
@@ -113,6 +113,3 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
     </div>
   );
 }
-
-// Add memo helper
-import { useMemo } from "react";

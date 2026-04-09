@@ -22,7 +22,7 @@ const getFuzzy = (obj: any, key: string) => {
 
 // Helper to map spreadsheet data to internal application format
 const mapUser = (row: any) => ({
-  User_ID: getFuzzy(row, "User_ID") || "",
+  User_ID: getFuzzy(row, "User_ID")?.toString().trim() || "",
   Username: getFuzzy(row, "Username") || "",
   Password: getFuzzy(row, "Password") || "",
   Name: getFuzzy(row, "Nama") || "",
@@ -34,7 +34,7 @@ const mapUser = (row: any) => ({
 });
 
 const mapLogbook = (row: any) => ({
-  User_ID: getFuzzy(row, "User_ID") || "",
+  User_ID: getFuzzy(row, "User_ID")?.toString().trim() || "",
   Date: getFuzzy(row, "Tanggal") || "",
   Sesi: getFuzzy(row, "Sesi") || "",
   Activity: getFuzzy(row, "Aktivitas") || getFuzzy(row, "Nama_Aktivitas") || "",
@@ -186,6 +186,8 @@ export async function GET() {
     if (userRole === "client") {
       return NextResponse.json({
         ...processAthleteData(users[0], logbook, tesFisik),
+        logbook: logbook,
+        tes_fisik: tesFisik,
         masterTests
       });
     }

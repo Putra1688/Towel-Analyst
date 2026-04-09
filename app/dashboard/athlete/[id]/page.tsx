@@ -98,20 +98,20 @@ export default function AthleteDetail() {
    const [isAddingTestResult, setIsAddingTestResult] = useState(false);
 
    // -- DATA PROCESSING (HOOKS AT TOP) --
-   const athleteSummary = useMemo(() => 
-      data?.summary?.find((s: any) => s.user.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()),
-      [data, id]
-   );
+   const athleteSummary = useMemo(() => {
+      const decodedId = decodeURIComponent(id as string).toLowerCase();
+      return data?.summary?.find((s: any) => s.user.User_ID?.toString().toLowerCase() === decodedId);
+   }, [data, id]);
 
-   const athleteLogs = useMemo(() => 
-      data?.logbook?.filter((l: any) => l.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()) || [], 
-      [data, id]
-   );
+   const athleteLogs = useMemo(() => {
+      const decodedId = decodeURIComponent(id as string).toLowerCase();
+      return data?.logbook?.filter((l: any) => l.User_ID?.toString().toLowerCase() === decodedId) || [];
+   }, [data, id]);
 
-   const athleteTests = useMemo(() => 
-      data?.tes_fisik?.filter((t: any) => t.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()) || [], 
-      [data, id]
-   );
+   const athleteTests = useMemo(() => {
+      const decodedId = decodeURIComponent(id as string).toLowerCase();
+      return data?.tes_fisik?.filter((t: any) => t.User_ID?.toString().toLowerCase() === decodedId) || [];
+   }, [data, id]);
 
    const radarData = useMemo(() => 
       getRadarData(data?.masterTests || [], athleteTests), 
@@ -131,7 +131,8 @@ export default function AthleteDetail() {
 
    const timelineData = useMemo(() => {
       const sourceData = activeTab === 'fisik' ? athleteTests : athleteLogs;
-      return aggregateByTimeline(sourceData, timeframe, timeframe === 'monthly' ? 'Date' : 'Date');
+      const aggType = activeTab === 'fisik' ? 'avg' : 'sum';
+      return aggregateByTimeline(sourceData, timeframe, 'Date', aggType);
    }, [activeTab, timeframe, athleteLogs, athleteTests]);
 
    // Initializing local states once data is loaded
