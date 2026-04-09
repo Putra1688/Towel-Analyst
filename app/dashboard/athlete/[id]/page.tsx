@@ -38,12 +38,17 @@ export default function AthleteDetail() {
    });
 
    const [sessions, setSessions] = useState<any[]>([]);
-   const [newSession, setNewSession] = useState({
+   const [sessionName, setSessionName] = useState("");
+   const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
+   const [pendingExercises, setPendingExercises] = useState<any[]>([]);
+   const [currentExercise, setCurrentExercise] = useState({
       activity: "",
-      date: new Date().toISOString().split('T')[0],
+      set: 0,
       reps: 0,
-      duration: 0
+      load: 0,
+      note: ""
    });
+
 
    const [testResults, setTestResults] = useState<any[]>([]);
    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
@@ -125,21 +130,45 @@ export default function AthleteDetail() {
       }
    };
 
-   const handleAddSession = async () => {
-      if (!newSession.activity || !newSession.date || newSession.reps <= 0 || newSession.duration <= 0) return;
+   const handleAddExercise = () => {
+      if (!currentExercise.activity || currentExercise.set <= 0 || currentExercise.reps <= 0) return;
+      setPendingExercises([...pendingExercises, { ...currentExercise, id: Date.now() }]);
+      setCurrentExercise({ ...currentExercise, set: 0, reps: 0, load: 0, note: "" });
+   };
+
+   const removePendingExercise = (id: number) => {
+      setPendingExercises(pendingExercises.filter(e => e.id !== id));
+   };
+
+   const handleSaveSession = async () => {
+      if (!sessionName || pendingExercises.length === 0) return;
       setIsAddingSession(true);
       try {
+         const payload = pendingExercises.map(ex => ({
+            userId: id,
+            date: sessionDate,
+            sessionName: sessionName,
+            activity: ex.activity,
+            set: ex.set,
+            reps: ex.reps,
+            load: ex.load,
+            note: ex.note
+         }));
+
          const res = await fetch("/api/gsheets", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                action: "addLogbook",
-               payload: { userId: id, ...newSession }
+               payload: payload
             })
          });
+         
          if (res.ok) {
-            setSessions([...sessions, { ...newSession, id: Date.now() }]);
-            setNewSession({ activity: "", date: new Date().toISOString().split('T')[0], reps: 0, duration: 0 });
+            setSessions([...sessions, ...pendingExercises.map(ex => ({ ...ex, date: sessionDate }))]);
+            setPendingExercises([]);
+            setSessionName("");
+            // Optional: window.location.reload() or refetch()
          }
       } catch (error) {
          console.error("Failed to add session", error);
@@ -147,6 +176,7 @@ export default function AthleteDetail() {
          setIsAddingSession(false);
       }
    };
+
 
    const removeSession = (sessionId: number) => {
       setSessions(sessions.filter(s => s.id !== sessionId));
@@ -318,59 +348,129 @@ export default function AthleteDetail() {
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                      <div className="space-y-1">
                         <p className="text-[10px] font-black text-gold-600 uppercase tracking-[.3em]">MANAJEMEN SESI LATIHAN</p>
-                        <h4 className="text-3xl font-black text-white uppercase tracking-tighter">Set Latihan Baru</h4>
+                        <h4 className="text-3xl font-black text-white uppercase tracking-tighter">Perencana Sesi Coach</h4>
                      </div>
-                     <button
-                        onClick={handleAddSession}
-                        disabled={isAddingSession}
-                        className="px-8 py-4 bg-gold-600 hover:bg-gold-500 text-zinc-950 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 disabled:opacity-50"
-                     >
-                        {isAddingSession ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {isAddingSession ? "Memproses..." : "Simpan Sesi"}
-                     </button>
+                     {pendingExercises.length > 0 && (
+                        <button
+                           onClick={handleSaveSession}
+                           disabled={isAddingSession}
+                           className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                        >
+                           {isAddingSession ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                           {isAddingSession ? "Memproses..." : "Terbitkan Sesi"}
+                        </button>
+                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                     <div className="md:col-span-4 space-y-3">
-                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Nama Sesi</p>
-                        <select value={newSession.activity} onChange={(e) => setNewSession({ ...newSession, activity: e.target.value })} className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none">
-                           <option value="" disabled className="bg-dashboard-bg">Pilih Aktivitas...</option>
-                           {data?.masterTests?.map((test: any) => (<option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>))}
-                           <option value="Training Match" className="bg-dashboard-bg">Training Match</option>
-                           <option value="Recovery" className="bg-dashboard-bg">Recovery</option>
-                        </select>
+
+                  {/* Step 1: Session Header */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white/5 border border-white/5 rounded-[32px]">
+                     <div className="space-y-3">
+                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Nama Sesi (Manual)</p>
+                        <input
+                           type="text"
+                           value={sessionName}
+                           onChange={(e) => setSessionName(e.target.value)}
+                           placeholder="Contoh: Penguatan Kaki Pagi, Power & Speed..."
+                           className="w-full bg-dashboard-bg border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all placeholder:text-zinc-800"
+                        />
                      </div>
-                     <div className="md:col-span-3 space-y-3">
-                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 text-center">Tanggal</p>
-                        <input type="date" value={newSession.date} onChange={(e) => setNewSession({ ...newSession, date: e.target.value })} className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-black text-white outline-none focus:border-gold-600/30 transition-all text-center [color-scheme:dark]" />
-                     </div>
-                     <div className="md:col-span-2 space-y-3">
-                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 text-center">RPE (1-10)</p>
-                        <input type="number" min="0" max="10" value={newSession.reps || ""} onChange={(e) => setNewSession({ ...newSession, reps: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
-                     </div>
-                     <div className="md:col-span-3 space-y-3">
-                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 text-center">Durasi (Min)</p>
-                        <input type="number" min="0" value={newSession.duration || ""} onChange={(e) => setNewSession({ ...newSession, duration: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
+                     <div className="space-y-3">
+                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Tanggal Latihan</p>
+                        <input
+                           type="date"
+                           value={sessionDate}
+                           onChange={(e) => setSessionDate(e.target.value)}
+                           className="w-full bg-dashboard-bg border border-white/5 rounded-2xl py-4 px-6 text-sm font-black text-white outline-none focus:border-gold-600/30 transition-all [color-scheme:dark]"
+                        />
                      </div>
                   </div>
-                  {sessions.length > 0 && (
+
+                  {/* Step 2: Exercise Builder */}
+                  <div className="space-y-6">
+                     <div className="flex items-center gap-2 mb-2">
+                         <div className="w-1 h-4 bg-gold-600 rounded-full" />
+                         <p className="text-[10px] font-black text-white uppercase tracking-widest">Tambah Item Latihan</p>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div className="md:col-span-4 space-y-3">
+                           <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Jenis Latihan</p>
+                           <select
+                              value={currentExercise.activity}
+                              onChange={(e) => setCurrentExercise({ ...currentExercise, activity: e.target.value })}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none"
+                           >
+                              <option value="" disabled className="bg-dashboard-bg">Pilih Latihan...</option>
+                              {data?.masterTests?.map((test: any) => (<option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>))}
+                              <optgroup label="Standar" className="bg-dashboard-bg">
+                                 <option value="Training Match">Training Match</option>
+                                 <option value="Recovery">Recovery</option>
+                              </optgroup>
+                           </select>
+                        </div>
+                        <div className="md:col-span-1 space-y-3">
+                           <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest text-center">Set</p>
+                           <input type="number" value={currentExercise.set || ""} onChange={(e) => setCurrentExercise({ ...currentExercise, set: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-1 text-xs font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
+                        </div>
+                        <div className="md:col-span-2 space-y-3">
+                           <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest text-center">Repetisi</p>
+                           <input type="number" value={currentExercise.reps || ""} onChange={(e) => setCurrentExercise({ ...currentExercise, reps: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-4 text-xs font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
+                        </div>
+                        <div className="md:col-span-2 space-y-3">
+                           <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest text-center">Load (kg)</p>
+                           <input type="number" value={currentExercise.load || ""} onChange={(e) => setCurrentExercise({ ...currentExercise, load: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-4 text-xs font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
+                        </div>
+                        <div className="md:col-span-3 space-y-3">
+                           <button
+                              onClick={handleAddExercise}
+                              className="w-full py-4 bg-white/5 hover:bg-gold-600 hover:text-zinc-950 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all group"
+                           >
+                              + Tambah Item
+                           </button>
+                        </div>
+                     </div>
+                     <div className="space-y-3">
+                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Catatan Tambahan (Opsional)</p>
+                        <textarea
+                           value={currentExercise.note}
+                           onChange={(e) => setCurrentExercise({ ...currentExercise, note: e.target.value })}
+                           placeholder="Instruksi khusus atau catatan teknis..."
+                           rows={1}
+                           className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all placeholder:text-zinc-800 resize-none"
+                        />
+                     </div>
+                  </div>
+
+                  {/* Step 3: Pending List Review */}
+                  {pendingExercises.length > 0 && (
                      <div className="pt-10 border-t border-white/5 space-y-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Daftar Latihan Sesi Ini</p>
+                            <p className="text-[9px] font-black text-gold-600 uppercase tracking-widest">{pendingExercises.length} Gerakan ditambahkan</p>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {sessions.map((s) => (
-                              <div key={s.id} className="p-5 bg-white/5 border border-white/5 rounded-3xl flex items-center justify-between group hover:border-gold-600/20 transition-all">
+                           {pendingExercises.map((e) => (
+                              <div key={e.id} className="p-5 bg-white/5 border border-white/5 rounded-3xl flex items-center justify-between group hover:border-gold-600/20 transition-all">
                                  <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-gold-600/10 flex items-center justify-center text-gold-600 text-[10px] font-black">{s.date.split('-').slice(1).join('/')}</div>
+                                    <div className="w-10 h-10 rounded-xl bg-gold-600/10 flex items-center justify-center text-gold-600 text-[10px] font-black">
+                                        {e.activity.charAt(0)}
+                                    </div>
                                     <div className="space-y-0.5">
-                                       <p className="text-xs font-black text-white uppercase">{s.activity}</p>
-                                       <p className="text-[9px] font-bold text-zinc-600 uppercase">Load: {s.reps * s.duration}</p>
+                                       <p className="text-xs font-black text-white uppercase">{e.activity}</p>
+                                       <p className="text-[9px] font-bold text-zinc-600 uppercase">
+                                          {e.set} Set × {e.reps} Reps @ {e.load}kg
+                                       </p>
                                     </div>
                                  </div>
-                                 <button onClick={() => removeSession(s.id)} className="p-2 text-zinc-800 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                 <button onClick={() => removePendingExercise(e.id)} className="p-2 text-zinc-800 hover:text-rose-500 transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                 </button>
                               </div>
                            ))}
                         </div>
                      </div>
                   )}
                </div>
+
             </div>
          </div>
 

@@ -6,14 +6,26 @@
 export interface LogbookEntry {
   User_ID: string;
   Date: string;
-  RPE: number;
-  Duration: number;
-  Activity?: string;
+  Sesi?: string;
+  Activity: string;
+  Set?: number;
+  Repetisi?: number;
+  Load?: number;
+  Note?: string;
+  // Legacy fields
+  RPE?: number;
+  Duration?: number;
 }
 
 export function calculateDailyLoad(entry: LogbookEntry) {
-  return entry.RPE * entry.Duration;
+  // Use new formula: Set * Repetisi * Load
+  const volumeLoad = (Number(entry.Set) || 0) * (Number(entry.Repetisi) || 0) * (Number(entry.Load) || 0);
+  if (volumeLoad > 0) return volumeLoad;
+  
+  // Legacy fallback: RPE * Duration
+  return (Number(entry.RPE) || 0) * (Number(entry.Duration) || 0);
 }
+
 
 export function calculateAge(birthDate: string) {
   if (!birthDate) return 0;

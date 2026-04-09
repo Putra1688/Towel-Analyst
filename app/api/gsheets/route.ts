@@ -20,11 +20,17 @@ const mapUser = (row: any) => ({
 const mapLogbook = (row: any) => ({
   User_ID: row.User_ID || "",
   Date: row.Tanggal || "",
+  Sesi: row.Sesi || "",
   Activity: row.Nama_Aktivitas || "",
+  Set: Number(row.Set) || 0,
+  Repetisi: Number(row.Repetisi) || 0,
+  Load: Number(row.Load) || 0,
+  Note: row.Note || "",
+  // Legacy fields
   RPE: Number(row.RPE) || 0,
-  Duration: Number(row.Durasi) || 0,
-  Daily_Load: Number(row.Daily_Load) || 0
+  Duration: Number(row.Durasi) || 0
 });
+
 
 const mapMasterTest = (row: any) => ({
   Test_ID: row.Test_ID || "",
@@ -180,17 +186,24 @@ export async function POST(req: Request) {
 
       case "addLogbook": {
         const sheet = await getSheet("logbook_harian");
-        await sheet?.addRow({
-          Timestamp: new Date().toISOString(),
-          User_ID: payload.userId,
-          Tanggal: payload.date,
-          Nama_Aktivitas: payload.activity,
-          RPE: payload.reps,
-          Durasi: payload.duration,
-          Daily_Load: payload.reps * payload.duration
-        });
+        const entries = Array.isArray(payload) ? payload : [payload];
+        
+        for (const item of entries) {
+          await sheet?.addRow({
+            Timestamp: new Date().toISOString(),
+            User_ID: item.userId,
+            Tanggal: item.date,
+            Sesi: item.sessionName || "",
+            Nama_Aktivitas: item.activity,
+            Set: item.set || 0,
+            Repetisi: item.reps || 0,
+            Load: item.load || 0,
+            Note: item.note || ""
+          });
+        }
         return NextResponse.json({ success: true });
       }
+
 
       case "addTestResult": {
         const sheet = await getSheet("test_fisik");
