@@ -28,8 +28,9 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const clientLinks = [
     { name: "Dashboard Saya", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Penilaian Saya", href: "/dashboard/assessment", icon: ClipboardCheck },
-    { name: "Profil & Riwayat", href: "/dashboard/profile", icon: History },
+    { name: "Profil Fisik", href: "/dashboard/profil-fisik", icon: UserCircle },
+    { name: "Logbook Harian", href: "/dashboard/logbook", icon: History },
+    { name: "Tes Fisik", href: "/dashboard/tes-fisik", icon: Trophy },
   ];
 
   const links = role === "coach" ? coachLinks : clientLinks;

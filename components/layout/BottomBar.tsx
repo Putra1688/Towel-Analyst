@@ -8,7 +8,8 @@ import {
   Settings, 
   ClipboardCheck, 
   History,
-  Trophy
+  Trophy,
+  UserCircle
 } from "lucide-react";
 
 interface BottomBarProps {
@@ -26,8 +27,9 @@ export default function BottomBar({ role }: BottomBarProps) {
 
   const clientLinks = [
     { name: "Beranda", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Nilai", href: "/dashboard/assessment", icon: ClipboardCheck },
-    { name: "Profil", href: "/dashboard/profile", icon: History },
+    { name: "Profil", href: "/dashboard/profil-fisik", icon: UserCircle },
+    { name: "Logbook", href: "/dashboard/logbook", icon: History },
+    { name: "Fisik", href: "/dashboard/tes-fisik", icon: Trophy },
   ];
 
   const links = role === "coach" ? coachLinks : clientLinks;

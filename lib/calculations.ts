@@ -26,6 +26,71 @@ export function calculateDailyLoad(entry: LogbookEntry) {
   return (Number(entry.RPE) || 0) * (Number(entry.Duration) || 0);
 }
 
+export function calculateComparison(current: number, previous: number) {
+   const diff = current - previous;
+   const percent = previous !== 0 ? (diff / previous) * 100 : 0;
+   return {
+      diff: Number(diff.toFixed(1)),
+      percent: Number(percent.toFixed(1)),
+      isUp: diff > 0,
+      isDown: diff < 0
+   };
+}
+
+export function aggregateByTimeline(data: any[], timeline: 'daily' | 'weekly' | 'monthly', dateField: string = 'Date') {
+   const groups: Record<string, any> = {};
+
+   data.forEach(item => {
+      const date = new Date(item[dateField]);
+      let key = '';
+      
+      if (timeline === 'daily') {
+         key = date.toISOString().split('T')[0];
+      } else if (timeline === 'weekly') {
+         // Get the start of the week (Monday)
+         const day = date.getDay() || 7;
+         const start = new Date(date);
+         start.setHours(0,0,0,0);
+         start.setDate(date.getDate() - day + 1);
+         key = start.toISOString().split('T')[0];
+      } else {
+         // Monthly
+         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      if (!groups[key]) {
+         groups[key] = { label: key, value: 0, count: 0 };
+      }
+      
+      const val = item.value || calculateDailyLoad(item) || item.achievement || 0;
+      groups[key].value += val;
+      groups[key].count += 1;
+   });
+
+   return Object.values(groups).sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getRadarData(masterTests: any[], results: any[]) {
+   const components = ["Endurance", "Strength", "Speed", "Agility", "Flexibility", "Power", "Umum"];
+   
+   return components.map(comp => {
+      const testsInComp = masterTests.filter(t => t.Category === comp);
+      const testNames = testsInComp.map(t => t.Name);
+      
+      const scores = results
+         .filter(r => testNames.includes(r.Metric))
+         .map(r => r.achievement || 0);
+      
+      const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      
+      return {
+         subject: comp,
+         A: Math.round(avg),
+         fullMark: 100
+      };
+   });
+}
+
 
 export function calculateAge(birthDate: string) {
   if (!birthDate) return 0;
@@ -66,8 +131,8 @@ export function calculateBMI(weight: number, height: number) {
 }
 
 export function getBMIStatus(bmi: number) {
-  if (bmi < 18.5) return "Kurang";
-  if (bmi >= 18.5 && bmi <= 25) return "Optimal";
+  if (bmi < 18.5) return "Underweight";
+  if (bmi >= 18.5 && bmi <= 25) return "Normal (Best Mark)";
   return "Overweight";
 }
 
