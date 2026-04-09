@@ -140,6 +140,7 @@ export async function GET() {
       teamAvgAchievement: summary.length > 0
         ? Math.round(summary.reduce((acc, cur) => acc + cur.avgAchievement, 0) / summary.length)
         : 0,
+      alerts: summary.filter(s => s.metrics.acwr > 1.3),
       masterTests
     });
 

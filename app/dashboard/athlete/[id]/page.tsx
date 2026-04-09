@@ -428,15 +428,15 @@ export default function AthleteDetail() {
                                  <div className="p-5 bg-white/5 border border-white/5 rounded-3xl space-y-2">
                                     <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest leading-none">Indeks BMI</p>
                                     <div className="flex items-baseline gap-2">
-                                       <p className="text-2xl font-black text-white">{athleteSummary.metrics.bmi || 0}</p>
+                                       <p className="text-2xl font-black text-white">{athleteSummary.bmi || 0}</p>
                                     </div>
                                     <div className={`px-2 py-1 rounded-md inline-block ${
-                                       athleteSummary.metrics.bmiStatus.includes('Normal') 
+                                       athleteSummary.bmiStatus?.includes('Normal') 
                                           ? "bg-gold-600/10 text-gold-600 border border-gold-600/20" 
                                           : "bg-rose-500/10 text-rose-500 border border-rose-500/20"
                                     }`}>
                                        <p className="text-[7px] font-black uppercase tracking-widest font-mono">
-                                          Analyst: {athleteSummary.metrics.bmiStatus}
+                                          Analyst: {athleteSummary.bmiStatus}
                                        </p>
                                     </div>
                                  </div>
