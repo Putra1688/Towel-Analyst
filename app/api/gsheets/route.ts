@@ -32,13 +32,20 @@ const mapLogbook = (row: any) => ({
 });
 
 
-const mapMasterTest = (row: any) => ({
-  Test_ID: row.Test_ID || "",
-  Name: row.Nama_Tes || "",
-  Unit: row.Satuan || "",
-  Description: row.Deskripsi || "",
-  Category: row.Komponen || "Umum"
-});
+const mapMasterTest = (row: any) => {
+  // Normalize keys to handle variations in spreadsheet headers (e.g., trailing spaces)
+  const obj: any = {};
+  for (const key in row) {
+    obj[key.trim()] = row[key];
+  }
+  return {
+    Test_ID: obj.Test_ID || "",
+    Name: obj.Nama_Tes || "",
+    Unit: obj.Satuan || "",
+    Description: obj.Deskripsi || "",
+    Category: obj.Komponen || "Umum"
+  };
+};
 
 
 const mapTestFisik = (row: any) => ({
@@ -76,10 +83,25 @@ export async function GET() {
 
     let users = usersRaw.map(r => mapUser(r.toObject()));
     let logbook = logbookRaw.map(r => mapLogbook(r.toObject()));
-    const masterTests = masterTestRaw.map(r => mapMasterTest(r.toObject()));
+    // Use loadCells to bypass potentially restricted Table ranges
+    await masterTestSheet.loadCells('A1:E200');
+    const masterTestRows = [];
+    for (let i = 1; i < 200; i++) {
+      const id = masterTestSheet.getCell(i, 0).value;
+      if (!id) continue;
+      masterTestRows.push({
+        Test_ID: id.toString(),
+        Name: masterTestSheet.getCell(i, 2).value?.toString() || "",
+        Unit: masterTestSheet.getCell(i, 3).value?.toString() || "",
+        Description: masterTestSheet.getCell(i, 4).value?.toString() || "",
+        Category: masterTestSheet.getCell(i, 1).value?.toString() || "Umum"
+      });
+    }
+    const masterTests = masterTestRows;
+
     let tesFisik = testFisikRaw.map(r => {
       const base = mapTestFisik(r.toObject());
-      const master = masterTests.find(m => m.Name === base.Metric);
+      const master = masterTests.find(m => m.Name === base.Metric || m.Test_ID === base.Metric);
       return { ...base, Category: master?.Category || "Umum" };
     });
 
@@ -232,15 +254,38 @@ export async function POST(req: Request) {
 
       case "addMasterTest": {
         const sheet = await getSheet("master_test");
-        const rows = await sheet?.getRows();
-        const nextId = (rows?.length || 0) + 1;
-        await sheet?.addRow({
-          Test_ID: nextId.toString(),
-          Nama_Tes: payload.Name,
-          Satuan: payload.Unit,
-          Deskripsi: payload.Description,
-          Komponen: payload.Category
-        });
+        if (!sheet) throw new Error("Sheet not found");
+
+        // Load a safe range to detect true end of data (bypassing Table ranges)
+        await sheet.loadCells('A1:E200');
+        
+        let lastRowIdx = 0;
+        let maxIdNum = 0;
+        
+        // Scan for highest ID and last occupied row
+        for (let i = 1; i < 200; i++) {
+          const idValue = sheet.getCell(i, 0).value;
+          if (idValue) {
+            lastRowIdx = i;
+            const match = idValue.toString().match(/\d+/);
+            if (match) {
+              const num = parseInt(match[0], 10);
+              if (num > maxIdNum) maxIdNum = num;
+            }
+          }
+        }
+
+        const nextId = `T${(maxIdNum + 1).toString().padStart(2, '0')}`;
+        const targetRow = lastRowIdx + 1;
+
+        // Write directly to cells to ensure it works even with Table range restrictions
+        sheet.getCell(targetRow, 0).value = nextId;
+        sheet.getCell(targetRow, 1).value = payload.Category;
+        sheet.getCell(targetRow, 2).value = payload.Name;
+        sheet.getCell(targetRow, 3).value = payload.Unit;
+        sheet.getCell(targetRow, 4).value = payload.Description;
+        
+        await sheet.saveUpdatedCells();
 
         return NextResponse.json({ success: true });
       }

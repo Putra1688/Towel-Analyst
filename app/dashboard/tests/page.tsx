@@ -16,8 +16,10 @@ import {
   Activity,
   Edit3,
   Trash2,
-  Loader2
+  Loader2,
+  ChevronDown
 } from "lucide-react";
+import { useMemo } from "react";
 
 export default function MasterTests() {
   const { data, isLoading } = useLogbookData();
@@ -35,10 +37,34 @@ export default function MasterTests() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Search and Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
-  if (isLoading) return null;
+  const categories = ["All", "Endurance", "Strength", "Speed", "Agility", "Flexibility", "Power", "Umum"];
 
   const tests = data?.masterTests || [];
+
+  const filteredTests = useMemo(() => {
+    return tests.filter((test: any) => {
+      const matchesSearch = 
+        test.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (test.Description || "").toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = selectedCategory === "All" || test.Category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [tests, searchQuery, selectedCategory]);
+
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-gold-600" />
+      <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Memuat Kamus Tes...</p>
+    </div>
+  );
 
   const openModal = (test: any = null) => {
     if (test) {
@@ -65,7 +91,10 @@ export default function MasterTests() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: editingTest ? "updateMasterTest" : "addMasterTest",
-          payload: formData
+          payload: {
+            ...formData,
+            Test_ID: editingTest?.Test_ID
+          }
         })
       });
 
@@ -132,8 +161,8 @@ export default function MasterTests() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 bg-white/5 border border-white/5 rounded-3xl group hover:border-gold-600/20 transition-all flex items-center justify-between">
           <div className="space-y-2">
-            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Total Matriks</p>
-            <p className="text-3xl font-black text-white">{tests.length}</p>
+            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">Matriks Tersaring</p>
+            <p className="text-3xl font-black text-white">{filteredTests.length} <span className="text-xs text-zinc-500">/ {tests.length}</span></p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-gold-600" />
@@ -145,52 +174,96 @@ export default function MasterTests() {
             <Search className="absolute left-4 w-5 h-5 text-zinc-600 group-focus-within:text-gold-600 transition-colors" />
             <input
               type="text"
-              placeholder="Cari nama tes atau kategori..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama tes atau deskripsi..."
               className="w-full bg-dashboard-bg border border-white/5 focus:border-gold-600/30 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white outline-none transition-all placeholder:text-zinc-700"
             />
           </div>
-          <button className="p-4 bg-white/5 border border-white/5 rounded-2xl text-zinc-500 hover:text-white transition-all">
-            <Filter className="w-5 h-5" />
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+              className={`flex items-center gap-3 px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory !== 'All' ? 'text-gold-600 border-gold-600/30' : 'text-zinc-500 hover:text-white'}`}
+            >
+              <Filter className="w-4 h-4" />
+              {selectedCategory === 'All' ? 'KOMPONEN' : selectedCategory}
+              <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isFilterDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isFilterDropdownOpen && (
+              <div className="absolute right-0 mt-3 w-48 bg-[#181818] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setIsFilterDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors ${selectedCategory === cat ? 'bg-gold-600/10 text-gold-600' : 'text-zinc-500 hover:bg-white/5 hover:text-white'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {tests.map((test: any, idx: number) => (
-          <div key={idx} className="stat-card p-4 md:p-8 flex flex-col items-center text-center gap-4 md:gap-6 group hover:border-gold-600/50 shadow-2xl relative overflow-hidden">
-            <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-[24px] bg-gold-600/10 border border-gold-600/20 flex items-center justify-center text-gold-600 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-[0_0_20px_-10px_rgba(212,175,55,0.4)]">
-              <ClipboardCheck className="w-5 h-5 md:w-8 md:h-8" />
-            </div>
-            <div className="space-y-1 md:space-y-2">
-              <p className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">{test.Category}</p>
-              <h3 className="text-sm md:text-xl font-bold text-white uppercase tracking-tighter line-clamp-1">{test.Name}</h3>
-              <div className="inline-flex px-2 py-0.5 md:px-3 md:py-1 bg-white/5 border border-white/5 rounded-full text-[7px] md:text-[10px] font-black text-gold-600 uppercase tracking-widest">
-                {test.Unit}
+      {filteredTests.length === 0 ? (
+        <div className="p-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[40px] gap-6 text-center animate-in fade-in duration-500">
+          <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-zinc-600">
+            <Search className="w-10 h-10" />
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-xl font-bold text-white uppercase">Tidak ada hasil ditemukan</h4>
+            <p className="text-sm text-zinc-500">Coba ubah kata kunci pencarian atau ganti filter komponen.</p>
+          </div>
+          <button 
+            onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
+            className="px-6 py-2 bg-gold-600/10 text-gold-600 border border-gold-600/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-600/20"
+          >
+            Reset Filter
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {filteredTests.map((test: any, idx: number) => (
+            <div key={idx} className="stat-card p-4 md:p-8 flex flex-col items-center text-center gap-4 md:gap-6 group hover:border-gold-600/50 shadow-2xl relative overflow-hidden">
+              <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-[24px] bg-gold-600/10 border border-gold-600/20 flex items-center justify-center text-gold-600 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-[0_0_20px_-10px_rgba(212,175,55,0.4)]">
+                <ClipboardCheck className="w-5 h-5 md:w-8 md:h-8" />
+              </div>
+              <div className="space-y-1 md:space-y-2">
+                <p className="text-[7px] md:text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">{test.Category}</p>
+                <h3 className="text-sm md:text-xl font-bold text-white uppercase tracking-tighter line-clamp-1">{test.Name}</h3>
+                <div className="inline-flex px-2 py-0.5 md:px-3 md:py-1 bg-white/5 border border-white/5 rounded-full text-[7px] md:text-[10px] font-black text-gold-600 uppercase tracking-widest">
+                  {test.Unit}
+                </div>
+              </div>
+              <p className="hidden md:block text-xs text-zinc-500 font-medium px-4 line-clamp-2">
+                {test.Description || "Standardized measurement used for athlete diagnostic records."}
+              </p>
+              <div className="w-full pt-3 md:pt-4 border-t border-white/5 flex items-center justify-around">
+                <button
+                  onClick={() => openModal(test)}
+                  className="flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-black text-gold-600 hover:text-white uppercase tracking-widest transition-all"
+                >
+                  <Edit3 className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
+                <div className="w-px h-3 md:h-4 bg-white/5" />
+                <button
+                  onClick={() => confirmDelete(test)}
+                  className="flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-black text-zinc-600 hover:text-rose-500 uppercase tracking-widest transition-all"
+                >
+                  <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="hidden sm:inline">Hapus</span>
+                </button>
               </div>
             </div>
-            <p className="hidden md:block text-xs text-zinc-500 font-medium px-4 line-clamp-2">
-              {test.Description || "Standardized measurement used for athlete diagnostic records."}
-            </p>
-            <div className="w-full pt-3 md:pt-4 border-t border-white/5 flex items-center justify-around">
-              <button
-                onClick={() => openModal(test)}
-                className="flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-black text-gold-600 hover:text-white uppercase tracking-widest transition-all"
-              >
-                <Edit3 className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Edit</span>
-              </button>
-              <div className="w-px h-3 md:h-4 bg-white/5" />
-              <button
-                onClick={() => confirmDelete(test)}
-                className="flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-black text-zinc-600 hover:text-rose-500 uppercase tracking-widest transition-all"
-              >
-                <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Hapus</span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add/Edit Test Modal */}
       {isModalOpen && (
