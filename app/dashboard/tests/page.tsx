@@ -243,13 +243,15 @@ export default function MasterTests() {
                       onChange={(e) => setFormData({ ...formData, Category: e.target.value })}
                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none cursor-pointer"
                     >
-                      <option value="Strength" className="bg-dashboard-bg">Strength</option>
-                      <option value="Cardio" className="bg-dashboard-bg">Cardio</option>
                       <option value="Endurance" className="bg-dashboard-bg">Endurance</option>
-                      <option value="Power" className="bg-dashboard-bg">Power</option>
+                      <option value="Strength" className="bg-dashboard-bg">Strength</option>
                       <option value="Speed" className="bg-dashboard-bg">Speed</option>
+                      <option value="Agility" className="bg-dashboard-bg">Agility</option>
                       <option value="Flexibility" className="bg-dashboard-bg">Flexibility</option>
+                      <option value="Power" className="bg-dashboard-bg">Power</option>
+                      <option value="Umum" className="bg-dashboard-bg">Umum (General)</option>
                     </select>
+
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1 flex items-center gap-2">

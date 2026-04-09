@@ -41,7 +41,9 @@ export default function AthleteDetail() {
    const [sessionName, setSessionName] = useState("");
    const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
    const [pendingExercises, setPendingExercises] = useState<any[]>([]);
+   const [selectedComponent, setSelectedComponent] = useState("");
    const [currentExercise, setCurrentExercise] = useState({
+
       activity: "",
       set: 0,
       reps: 0,
@@ -52,12 +54,14 @@ export default function AthleteDetail() {
 
    const [testResults, setTestResults] = useState<any[]>([]);
    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+   const [selectedTestComponent, setSelectedTestComponent] = useState("");
    const [newTestResult, setNewTestResult] = useState({
       metric: "",
       target: "",
       value: "",
       date: new Date().toISOString().split('T')[0]
    });
+
 
    // -- LOADING STATES --
    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
@@ -193,6 +197,8 @@ export default function AthleteDetail() {
                action: "addTestResult",
                payload: { userId: id, ...newTestResult }
             })
+
+
          });
 
          if (res.ok) {
@@ -392,7 +398,27 @@ export default function AthleteDetail() {
                          <p className="text-[10px] font-black text-white uppercase tracking-widest">Tambah Item Latihan</p>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                        <div className="md:col-span-4 space-y-3">
+                        <div className="md:col-span-3 space-y-3">
+                           <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Pilih Komponen</p>
+                           <select
+                              value={selectedComponent}
+                              onChange={(e) => {
+                                 setSelectedComponent(e.target.value);
+                                 setCurrentExercise({ ...currentExercise, activity: "" });
+                              }}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none"
+                           >
+                              <option value="" className="bg-dashboard-bg">Semua Komponen</option>
+                              <option value="Endurance" className="bg-dashboard-bg">Endurance</option>
+                              <option value="Strength" className="bg-dashboard-bg">Strength</option>
+                              <option value="Speed" className="bg-dashboard-bg">Speed</option>
+                              <option value="Agility" className="bg-dashboard-bg">Agility</option>
+                              <option value="Flexibility" className="bg-dashboard-bg">Flexibility</option>
+                              <option value="Power" className="bg-dashboard-bg">Power</option>
+                              <option value="Umum" className="bg-dashboard-bg">Umum</option>
+                           </select>
+                        </div>
+                        <div className="md:col-span-3 space-y-3">
                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Jenis Latihan</p>
                            <select
                               value={currentExercise.activity}
@@ -400,13 +426,20 @@ export default function AthleteDetail() {
                               className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none"
                            >
                               <option value="" disabled className="bg-dashboard-bg">Pilih Latihan...</option>
-                              {data?.masterTests?.map((test: any) => (<option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>))}
-                              <optgroup label="Standar" className="bg-dashboard-bg">
-                                 <option value="Training Match">Training Match</option>
-                                 <option value="Recovery">Recovery</option>
-                              </optgroup>
+                              {data?.masterTests
+                                 ?.filter((t: any) => !selectedComponent || t.Category === selectedComponent)
+                                 ?.map((test: any) => (
+                                    <option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>
+                                 ))}
+                              {!selectedComponent && (
+                                 <optgroup label="Standar" className="bg-dashboard-bg">
+                                    <option value="Training Match">Training Match</option>
+                                    <option value="Recovery">Recovery</option>
+                                 </optgroup>
+                              )}
                            </select>
                         </div>
+
                         <div className="md:col-span-1 space-y-3">
                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest text-center">Set</p>
                            <input type="number" value={currentExercise.set || ""} onChange={(e) => setCurrentExercise({ ...currentExercise, set: Number(e.target.value) })} placeholder="0" className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-1 text-xs font-black text-white outline-none focus:border-gold-600/30 transition-all text-center" />
@@ -499,12 +532,41 @@ export default function AthleteDetail() {
                      </div>
                      <div className="space-y-6">
                         <div className="space-y-3">
-                           <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Pilih Test</p>
-                           <select value={newTestResult.metric} onChange={(e) => setNewTestResult({ ...newTestResult, metric: e.target.value })} className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none">
-                              <option value="" disabled className="bg-dashboard-bg">Pilih Master Test...</option>
-                              {data?.masterTests?.map((test: any) => (<option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>))}
+                           <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Pilih Komponen</p>
+                           <select
+                              value={selectedTestComponent}
+                              onChange={(e) => {
+                                 setSelectedTestComponent(e.target.value);
+                                 setNewTestResult({ ...newTestResult, metric: "" });
+                              }}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none cursor-pointer"
+                           >
+                              <option value="" className="bg-dashboard-bg">Semua Komponen</option>
+                              <option value="Endurance" className="bg-dashboard-bg">Endurance</option>
+                              <option value="Strength" className="bg-dashboard-bg">Strength</option>
+                              <option value="Speed" className="bg-dashboard-bg">Speed</option>
+                              <option value="Agility" className="bg-dashboard-bg">Agility</option>
+                              <option value="Flexibility" className="bg-dashboard-bg">Flexibility</option>
+                              <option value="Power" className="bg-dashboard-bg">Power</option>
+                              <option value="Umum" className="bg-dashboard-bg">Umum</option>
                            </select>
                         </div>
+                        <div className="space-y-3">
+                           <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Pilih Test</p>
+                           <select
+                              value={newTestResult.metric}
+                              onChange={(e) => setNewTestResult({ ...newTestResult, metric: e.target.value })}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-sm font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none"
+                           >
+                              <option value="" disabled className="bg-dashboard-bg">Pilih Master Test...</option>
+                              {data?.masterTests
+                                 ?.filter((t: any) => !selectedTestComponent || t.Category === selectedTestComponent)
+                                 ?.map((test: any) => (
+                                    <option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>
+                                 ))}
+                           </select>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-6">
                            <div className="space-y-3">
                               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest ml-1">Target (Sasaran)</p>

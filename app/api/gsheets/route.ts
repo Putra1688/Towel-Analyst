@@ -37,17 +37,20 @@ const mapMasterTest = (row: any) => ({
   Name: row.Nama_Tes || "",
   Unit: row.Satuan || "",
   Description: row.Deskripsi || "",
-  Category: "Physical" // Default
+  Category: row.Komponen || "Umum"
 });
+
 
 const mapTestFisik = (row: any) => ({
   Date: row.Tanggal || "",
   User_ID: row.User_ID || "",
-  Metric: row.Test_ID || "", // We map Test_ID to Metric for internal logic
+  Metric: row.Test_ID || "",
   Target: Number(row.Target) || 0,
   Value: Number(row.Hasil) || 0,
   achievement: Number(row.Achievement) || 0
 });
+
+
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -73,8 +76,12 @@ export async function GET() {
 
     let users = usersRaw.map(r => mapUser(r.toObject()));
     let logbook = logbookRaw.map(r => mapLogbook(r.toObject()));
-    let tesFisik = testFisikRaw.map(r => mapTestFisik(r.toObject()));
     const masterTests = masterTestRaw.map(r => mapMasterTest(r.toObject()));
+    let tesFisik = testFisikRaw.map(r => {
+      const base = mapTestFisik(r.toObject());
+      const master = masterTests.find(m => m.Name === base.Metric);
+      return { ...base, Category: master?.Category || "Umum" };
+    });
 
     // Filter by role
     if (userRole === "client") {
@@ -82,6 +89,8 @@ export async function GET() {
       tesFisik = tesFisik.filter(t => t.User_ID === userId);
       users = users.filter(u => u.User_ID === userId);
     }
+
+
 
     const processAthleteData = (u: any, l: any[], t: any[]) => {
       const metrics = calculateMetrics(l);
@@ -218,6 +227,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true });
       }
 
+
+
       case "addMasterTest": {
         const sheet = await getSheet("master_test");
         const rows = await sheet?.getRows();
@@ -226,8 +237,10 @@ export async function POST(req: Request) {
           Test_ID: nextId.toString(),
           Nama_Tes: payload.Name,
           Satuan: payload.Unit,
-          Deskripsi: payload.Description
+          Deskripsi: payload.Description,
+          Komponen: payload.Category
         });
+
         return NextResponse.json({ success: true });
       }
 
@@ -239,9 +252,11 @@ export async function POST(req: Request) {
           row.set("Nama_Tes", payload.Name);
           row.set("Satuan", payload.Unit);
           row.set("Deskripsi", payload.Description);
+          row.set("Komponen", payload.Category);
           await row.save();
           return NextResponse.json({ success: true });
         }
+
         return NextResponse.json({ error: "Test not found" }, { status: 404 });
       }
 
