@@ -12,21 +12,21 @@ import {
 
 interface StatusPieChartProps {
   data: {
-    Optimal: number;
-    Kurang: number;
+    Normal: number;
+    Underweight: number;
     Overweight: number;
   };
 }
 
 export default function StatusPieChart({ data }: StatusPieChartProps) {
   const chartData = [
-    { name: "Optimal", value: data?.Optimal || 0, color: "#d4af37" }, // Gold
-    { name: "Kurang", value: data?.Kurang || 0, color: "#3f3f46" },  // Zinc-600
-    { name: "Berlebih", value: data?.Overweight || 0, color: "#a1a1aa" }, // Zinc-400
+    { name: "Normal (Best Mark)", value: data?.Normal || 0, color: "#d4af37" }, // Gold
+    { name: "Underweight", value: data?.Underweight || 0, color: "#3f3f46" },  // Zinc-600
+    { name: "Overweight", value: data?.Overweight || 0, color: "#a1a1aa" }, // Zinc-400
   ];
 
   // If no data at all, show empty state
-  const hasData = data?.Optimal > 0 || data?.Kurang > 0 || data?.Overweight > 0;
+  const hasData = data?.Normal > 0 || data?.Underweight > 0 || data?.Overweight > 0;
 
   return (
     <div className="stat-card flex flex-col h-full bg-[#111] border-white/5 hover:border-gold-600/30">

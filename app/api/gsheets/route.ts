@@ -133,8 +133,8 @@ export async function GET() {
     return NextResponse.json({
       summary,
       teamBmiDistribution: {
-        Optimal: summary.filter(s => s.bmiStatus === "Optimal").length,
-        Kurang: summary.filter(s => s.bmiStatus === "Kurang").length,
+        Normal: summary.filter(s => s.bmiStatus === "Normal (Best Mark)").length,
+        Underweight: summary.filter(s => s.bmiStatus === "Underweight").length,
         Overweight: summary.filter(s => s.bmiStatus === "Overweight").length,
       },
       teamAvgAchievement: summary.length > 0
