@@ -59,15 +59,21 @@ export function aggregateByTimeline(data: any[], timeline: 'daily' | 'weekly' | 
       }
 
       if (!groups[key]) {
-         groups[key] = { label: key, value: 0, count: 0 };
+         groups[key] = { label: key, sum: 0, count: 0 };
       }
       
-      const val = item.value || calculateDailyLoad(item) || item.achievement || 0;
-      groups[key].value += val;
+      const val = item.achievement || item.Achievement || item.value || item.Value || calculateDailyLoad(item) || 0;
+      groups[key].sum += val;
       groups[key].count += 1;
    });
 
-   return Object.values(groups).sort((a, b) => a.label.localeCompare(b.label));
+   return Object.values(groups)
+      .map(g => ({
+         label: g.label,
+         value: g.count > 0 ? Math.round(g.sum / g.count) : 0,
+         count: g.count
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 export function getRadarData(masterTests: any[], results: any[]) {

@@ -4,58 +4,72 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getLoadedDoc, getSheet } from "@/lib/google-sheets";
 import { calculateMetrics, calculateBMI, getBMIStatus, calculateAchievement } from "@/lib/calculations";
 
+// Helper to find value in object ignoring icons, spaces, and case
+const getFuzzy = (obj: any, key: string) => {
+  if (!obj) return undefined;
+  // Exact match first
+  if (obj[key] !== undefined) return obj[key];
+  
+  const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const k in obj) {
+    const normalizedK = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normalizedK === normalizedKey || normalizedK.includes(normalizedKey)) {
+      return obj[k];
+    }
+  }
+  return undefined;
+};
+
 // Helper to map spreadsheet data to internal application format
 const mapUser = (row: any) => ({
-  User_ID: row.User_ID || "",
-  Username: row.Username || "",
-  Password: row.Password || "",
-  Name: row.Nama || "",
-  Role: row.Role || "client",
-  Weight: Number(row.BB) || 0,
-  Height: Number(row.TB) || 0,
-  Cabor: row.Cabor || "",
-  Birth_Date: row.Tgl_Lahir || ""
+  User_ID: getFuzzy(row, "User_ID") || "",
+  Username: getFuzzy(row, "Username") || "",
+  Password: getFuzzy(row, "Password") || "",
+  Name: getFuzzy(row, "Nama") || "",
+  Role: getFuzzy(row, "Role") || "client",
+  Weight: Number(getFuzzy(row, "BB")) || 0,
+  Height: Number(getFuzzy(row, "TB")) || 0,
+  Cabor: getFuzzy(row, "Cabor") || "",
+  Birth_Date: getFuzzy(row, "Tgl_Lahir") || ""
 });
 
 const mapLogbook = (row: any) => ({
-  User_ID: row.User_ID || "",
-  Date: row.Tanggal || "",
-  Sesi: row.Sesi || "",
-  Activity: row.Nama_Aktivitas || "",
-  Set: Number(row.Set) || 0,
-  Repetisi: Number(row.Repetisi) || 0,
-  Load: Number(row.Load) || 0,
-  Note: row.Note || "",
-  // Legacy fields
-  RPE: Number(row.RPE) || 0,
-  Duration: Number(row.Durasi) || 0
+  User_ID: getFuzzy(row, "User_ID") || "",
+  Date: getFuzzy(row, "Tanggal") || "",
+  Sesi: getFuzzy(row, "Sesi") || "",
+  Activity: getFuzzy(row, "Aktivitas") || getFuzzy(row, "Nama_Aktivitas") || "",
+  Set: Number(getFuzzy(row, "Set")) || 0,
+  Repetisi: Number(getFuzzy(row, "Repetisi")) || 0,
+  Load: Number(getFuzzy(row, "Load")) || 0,
+  Note: getFuzzy(row, "Note") || getFuzzy(row, "Catatan") || ""
 });
 
 
-const mapMasterTest = (row: any) => {
-  // Normalize keys to handle variations in spreadsheet headers (e.g., trailing spaces)
-  const obj: any = {};
-  for (const key in row) {
-    obj[key.trim()] = row[key];
-  }
+const mapMasterTest = (row: any) => ({
+  Test_ID: getFuzzy(row, "Test_ID") || "",
+  Name: getFuzzy(row, "Nama_Tes") || "",
+  Unit: getFuzzy(row, "Satuan") || "",
+  Description: getFuzzy(row, "Deskripsi") || "",
+  Category: getFuzzy(row, "Komponen") || "Umum"
+});
+
+
+const mapTestFisik = (row: any) => {
+  const parseAchievement = (val: any) => {
+    if (val === undefined || val === null) return 0;
+    const str = val.toString().replace('%', '').trim();
+    return Number(str) || 0;
+  };
+
   return {
-    Test_ID: obj.Test_ID || "",
-    Name: obj.Nama_Tes || "",
-    Unit: obj.Satuan || "",
-    Description: obj.Deskripsi || "",
-    Category: obj.Komponen || "Umum"
+    Date: getFuzzy(row, "Tanggal") || "",
+    User_ID: getFuzzy(row, "User_ID") || "",
+    Metric: getFuzzy(row, "Test_ID") || "",
+    Target: Number(getFuzzy(row, "Target")) || 0,
+    Value: Number(getFuzzy(row, "Hasil")) || 0,
+    achievement: parseAchievement(getFuzzy(row, "Achievement") || getFuzzy(row, "% Achievement"))
   };
 };
-
-
-const mapTestFisik = (row: any) => ({
-  Date: row.Tanggal || "",
-  User_ID: row.User_ID || "",
-  Metric: row.Test_ID || "",
-  Target: Number(row.Target) || 0,
-  Value: Number(row.Hasil) || 0,
-  achievement: Number(row.Achievement) || 0
-});
 
 
 
@@ -76,33 +90,64 @@ export async function GET() {
       throw new Error("One or more required sheets are missing in the Google Spreadsheet.");
     }
 
-    const usersRaw = await usersSheet.getRows();
-    const logbookRaw = await logbookSheet.getRows();
-    const testFisikRaw = await testFisikSheet.getRows();
-    const masterTestRaw = await masterTestSheet.getRows();
+    // Helper to get all data from a sheet using loadCells (bypassing Table ranges)
+    const getAllData = async (sheet: any, maxCols: number) => {
+      await sheet.loadCells(`A1:${String.fromCharCode(64 + maxCols)}500`);
+      const headers: string[] = [];
+      for (let c = 0; c < maxCols; c++) {
+        const val = sheet.getCell(0, c).value?.toString().trim() || "";
+        if (val) headers[c] = val;
+      }
 
-    let users = usersRaw.map(r => mapUser(r.toObject()));
-    let logbook = logbookRaw.map(r => mapLogbook(r.toObject()));
-    // Use loadCells to bypass potentially restricted Table ranges
-    await masterTestSheet.loadCells('A1:E200');
-    const masterTestRows = [];
-    for (let i = 1; i < 200; i++) {
-      const id = masterTestSheet.getCell(i, 0).value;
-      if (!id) continue;
-      masterTestRows.push({
-        Test_ID: id.toString(),
-        Name: masterTestSheet.getCell(i, 2).value?.toString() || "",
-        Unit: masterTestSheet.getCell(i, 3).value?.toString() || "",
-        Description: masterTestSheet.getCell(i, 4).value?.toString() || "",
-        Category: masterTestSheet.getCell(i, 1).value?.toString() || "Umum"
-      });
-    }
-    const masterTests = masterTestRows;
+      const rows: any[] = [];
+      for (let r = 1; r < 500; r++) {
+        const rowData: any = {};
+        let hasData = false;
+        for (let c = 0; c < maxCols; c++) {
+          if (!headers[c]) continue;
+          const cell = sheet.getCell(r, c);
+          let val = cell.value;
+          
+          // Basic data detection
+          if (val !== null && val !== undefined && val !== "") hasData = true;
+          
+          // Handle Google Sheets date objects/serial numbers for Date-related columns
+          const isDateHeader = headers[c].toLowerCase().includes('tanggal') || 
+                               headers[c].toLowerCase().includes('tgl') || 
+                               headers[c].toLowerCase().includes('birth');
+                               
+          if (isDateHeader && typeof val === 'number' && val > 0) {
+            // Google Sheets serial date to JS Date: days since 1899-12-30
+            const jsDate = new Date((val - 25569) * 86400 * 1000);
+            val = jsDate.toISOString().split('T')[0];
+          }
+          
+          rowData[headers[c]] = val;
+        }
+        if (hasData) rows.push(rowData);
+        else if (r > 10 && !hasData) break; // Stop after 10 empty rows
+      }
+      return rows;
+    };
 
+    const usersRaw = await getAllData(usersSheet, 12);
+    const logbookRaw = await getAllData(logbookSheet, 12);
+    const testFisikRaw = await getAllData(testFisikSheet, 12);
+    const masterTestRaw = await getAllData(masterTestSheet, 12);
+
+    let users = usersRaw.map(r => mapUser(r));
+    let logbook = logbookRaw.map(r => mapLogbook(r));
+    const masterTests = masterTestRaw.map(r => mapMasterTest(r));
+    
     let tesFisik = testFisikRaw.map(r => {
-      const base = mapTestFisik(r.toObject());
-      const master = masterTests.find(m => m.Name === base.Metric || m.Test_ID === base.Metric);
-      return { ...base, Category: master?.Category || "Umum" };
+      const mapped = mapTestFisik(r);
+      // Robust matching: Check if Metric matches ID or Name for backward compatibility
+      const master = masterTests.find(m => m.Test_ID === mapped.Metric || m.Name === mapped.Metric);
+      return { 
+        ...mapped, 
+        Category: master?.Category || "Umum",
+        Name: master?.Name || mapped.Metric // Display name for UI
+      };
     });
 
     // Filter by role
@@ -147,8 +192,9 @@ export async function GET() {
 
     const uniqueUsers = users.filter(u => u.Role === "client");
     const summary = uniqueUsers.map(u => {
-      const uLogbook = logbook.filter(l => l.User_ID === u.User_ID);
-      const uTests = tesFisik.filter(t => t.User_ID === u.User_ID);
+      // Use case-insensitive matching for aggregation
+      const uLogbook = logbook.filter(l => l.User_ID?.toString().toLowerCase() === u.User_ID?.toString().toLowerCase());
+      const uTests = tesFisik.filter(t => t.User_ID?.toString().toLowerCase() === u.User_ID?.toString().toLowerCase());
       return processAthleteData(u, uLogbook, uTests);
     });
 
@@ -163,7 +209,9 @@ export async function GET() {
         ? Math.round(summary.reduce((acc, cur) => acc + cur.avgAchievement, 0) / summary.length)
         : 0,
       alerts: summary.filter(s => s.metrics.acwr > 1.3),
-      masterTests
+      masterTests,
+      logbook, // Ensure individual charts can see all logs
+      tes_fisik: tesFisik // Ensure individual charts can see all tests
     });
 
   } catch (error: any) {
@@ -171,6 +219,38 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// Helper to append a row manually (bypassing Table restrictions)
+const appendRowManual = async (sheet: any, data: any, maxCols: number) => {
+  await sheet.loadCells(`A1:${String.fromCharCode(64 + maxCols)}600`);
+  
+  // Find first truly empty row
+  let lastRowIdx = 0;
+  for (let r = 1; r < 600; r++) {
+    const val = sheet.getCell(r, 0).value;
+    if (val !== null && val !== undefined && val !== "") {
+      lastRowIdx = r;
+    }
+  }
+  
+  const targetRow = lastRowIdx + 1;
+  const headers: string[] = [];
+  for (let c = 0; c < maxCols; c++) {
+    headers[c] = sheet.getCell(0, c).value?.toString().trim() || "";
+  }
+
+  for (const key in data) {
+    const colIdx = headers.findIndex(h => {
+      const normalizedH = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const normalizedK = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return normalizedH === normalizedK || normalizedH.includes(normalizedK);
+    });
+    if (colIdx !== -1) {
+      sheet.getCell(targetRow, colIdx).value = data[key];
+    }
+  }
+  await sheet.saveUpdatedCells();
+};
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -183,11 +263,24 @@ export async function POST(req: Request) {
     switch (action) {
       case "addAthlete": {
         const sheet = await getSheet("users");
-        const rows = await sheet?.getRows();
-        const nextIdNumber = (rows?.length || 0) + 1;
-        const nextId = `ath-${nextIdNumber.toString().padStart(3, '0')}`;
+        if (!sheet) throw new Error("Sheet not found");
         
-        await sheet?.addRow({
+        // Manual scan for last ID
+        await sheet.loadCells('A1:A500');
+        let maxIdNum = 0;
+        for (let i = 1; i < 500; i++) {
+          const val = sheet.getCell(i, 0).value;
+          if (val) {
+            const match = val.toString().match(/\d+/);
+            if (match) {
+              const num = parseInt(match[0], 10);
+              if (num > maxIdNum) maxIdNum = num;
+            }
+          }
+        }
+        const nextId = `ath-${(maxIdNum + 1).toString().padStart(3, '0')}`;
+        
+        await appendRowManual(sheet, {
           User_ID: nextId,
           Username: payload.username,
           Password: payload.password,
@@ -197,7 +290,8 @@ export async function POST(req: Request) {
           TB: payload.height,
           Cabor: payload.cabor,
           Tgl_Lahir: payload.birthDate
-        });
+        }, 10);
+        
         return NextResponse.json({ success: true, id: nextId });
       }
 
@@ -218,20 +312,21 @@ export async function POST(req: Request) {
 
       case "addLogbook": {
         const sheet = await getSheet("logbook_harian");
+        if (!sheet) throw new Error("Sheet not found");
         const entries = Array.isArray(payload) ? payload : [payload];
         
         for (const item of entries) {
-          await sheet?.addRow({
+          await appendRowManual(sheet, {
             Timestamp: new Date().toISOString(),
             User_ID: item.userId,
             Tanggal: item.date,
             Sesi: item.sessionName || "",
-            Nama_Aktivitas: item.activity,
+            Aktivitas: item.activity,
             Set: item.set || 0,
             Repetisi: item.reps || 0,
             Load: item.load || 0,
             Note: item.note || ""
-          });
+          }, 10);
         }
         return NextResponse.json({ success: true });
       }
@@ -239,14 +334,19 @@ export async function POST(req: Request) {
 
       case "addTestResult": {
         const sheet = await getSheet("test_fisik");
-        await sheet?.addRow({
+        if (!sheet) throw new Error("Sheet not found");
+
+        const achievement = Math.round((Number(payload.value) / Number(payload.target)) * 100);
+
+        await appendRowManual(sheet, {
           Tanggal: payload.date,
           User_ID: payload.userId,
           Test_ID: payload.metric,
           Target: payload.target,
           Hasil: payload.value,
-          Achievement: Math.round((payload.value / payload.target) * 100)
-        });
+          "% Achievement": achievement
+        }, 8);
+
         return NextResponse.json({ success: true });
       }
 
@@ -256,36 +356,28 @@ export async function POST(req: Request) {
         const sheet = await getSheet("master_test");
         if (!sheet) throw new Error("Sheet not found");
 
-        // Load a safe range to detect true end of data (bypassing Table ranges)
-        await sheet.loadCells('A1:E200');
-        
-        let lastRowIdx = 0;
+        // Scan for highest ID manually
+        await sheet.loadCells('A1:A200');
         let maxIdNum = 0;
-        
-        // Scan for highest ID and last occupied row
         for (let i = 1; i < 200; i++) {
-          const idValue = sheet.getCell(i, 0).value;
-          if (idValue) {
-            lastRowIdx = i;
-            const match = idValue.toString().match(/\d+/);
+          const val = sheet.getCell(i, 0).value;
+          if (val) {
+            const match = val.toString().match(/\d+/);
             if (match) {
               const num = parseInt(match[0], 10);
               if (num > maxIdNum) maxIdNum = num;
             }
           }
         }
-
         const nextId = `T${(maxIdNum + 1).toString().padStart(2, '0')}`;
-        const targetRow = lastRowIdx + 1;
 
-        // Write directly to cells to ensure it works even with Table range restrictions
-        sheet.getCell(targetRow, 0).value = nextId;
-        sheet.getCell(targetRow, 1).value = payload.Category;
-        sheet.getCell(targetRow, 2).value = payload.Name;
-        sheet.getCell(targetRow, 3).value = payload.Unit;
-        sheet.getCell(targetRow, 4).value = payload.Description;
-        
-        await sheet.saveUpdatedCells();
+        await appendRowManual(sheet, {
+          Test_ID: nextId,
+          Komponen: payload.Category,
+          Nama_Tes: payload.Name,
+          Satuan: payload.Unit,
+          Deskripsi: payload.Description
+        }, 6);
 
         return NextResponse.json({ success: true });
       }

@@ -99,17 +99,17 @@ export default function AthleteDetail() {
 
    // -- DATA PROCESSING (HOOKS AT TOP) --
    const athleteSummary = useMemo(() => 
-      data?.summary?.find((s: any) => s.user.User_ID === id),
+      data?.summary?.find((s: any) => s.user.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()),
       [data, id]
    );
 
    const athleteLogs = useMemo(() => 
-      data?.logbook?.filter((l: any) => l.User_ID === id) || [], 
+      data?.logbook?.filter((l: any) => l.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()) || [], 
       [data, id]
    );
 
    const athleteTests = useMemo(() => 
-      data?.tes_fisik?.filter((t: any) => t.User_ID === id) || [], 
+      data?.tes_fisik?.filter((t: any) => t.User_ID?.toString().toLowerCase() === id?.toString().toLowerCase()) || [], 
       [data, id]
    );
 
@@ -273,10 +273,10 @@ export default function AthleteDetail() {
          });
 
          if (res.ok) {
-            const selectedMaster = data?.masterTests?.find((t: any) => t.Name === newTestResult.metric);
+            const selectedMaster = data?.masterTests?.find((t: any) => t.Test_ID === newTestResult.metric);
             const newEntry = {
                User_ID: id,
-               Metric: newTestResult.metric,
+               Metric: selectedMaster?.Test_ID || newTestResult.metric,
                Target: Number(newTestResult.target),
                Value: Number(newTestResult.value),
                Category: selectedMaster?.Category || "General",
@@ -777,7 +777,7 @@ export default function AthleteDetail() {
                               {data?.masterTests
                                  ?.filter((t: any) => !selectedTestComponent || t.Category === selectedTestComponent)
                                  ?.map((test: any) => (
-                                    <option key={test.Test_ID} value={test.Name} className="bg-dashboard-bg">{test.Name}</option>
+                                    <option key={test.Test_ID} value={test.Test_ID} className="bg-dashboard-bg">{test.Name}</option>
                                  ))}
                            </select>
                         </div>
