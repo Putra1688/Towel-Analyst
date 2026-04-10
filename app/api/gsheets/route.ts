@@ -77,8 +77,8 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const userRole = (session.user as any).role;
-  const userId = (session.user as any).userId;
+  const userId = (session.user as any).userId || (session.user as any).id;
+  const userRole = (session.user as any).role || "";
 
   try {
     const usersSheet = await getSheet("users");
@@ -115,7 +115,7 @@ export async function GET() {
           const isDateHeader = headers[c].toLowerCase().includes('tanggal') || 
                                headers[c].toLowerCase().includes('tgl') || 
                                headers[c].toLowerCase().includes('birth');
-                               
+
           if (isDateHeader && typeof val === 'number' && val > 0) {
             // Google Sheets serial date to JS Date: days since 1899-12-30
             const jsDate = new Date((val - 25569) * 86400 * 1000);
@@ -150,11 +150,11 @@ export async function GET() {
       };
     });
 
-    // Filter by role
+    // Filter by role with case-insensitive userId
     if (userRole === "client") {
-      logbook = logbook.filter(l => l.User_ID === userId);
-      tesFisik = tesFisik.filter(t => t.User_ID === userId);
-      users = users.filter(u => u.User_ID === userId);
+      logbook = logbook.filter(l => l.User_ID?.toString().toLowerCase() === userId?.toString().toLowerCase());
+      tesFisik = tesFisik.filter(t => t.User_ID?.toString().toLowerCase() === userId?.toString().toLowerCase());
+      users = users.filter(u => u.User_ID?.toString().toLowerCase() === userId?.toString().toLowerCase());
     }
 
 

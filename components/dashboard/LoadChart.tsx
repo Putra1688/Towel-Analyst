@@ -28,8 +28,8 @@ export default function LoadChart({ data, title, subtitle }: LoadChartProps) {
   const chartData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) return [];
     return data.map(d => ({
-      name: (d.label || '').length > 10 ? d.label.substring(0, 5) + "..." : (d.label || 'N/A'),
-      load: d.value || 0,
+      name: (d.label || d.Date || '').length > 10 ? (d.label || d.Date).substring(0, 5) + "..." : (d.label || d.Date || 'N/A'),
+      load: d.value !== undefined ? d.value : (d.load !== undefined ? d.load : 0),
     }));
   }, [data]);
 

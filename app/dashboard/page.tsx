@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useLogbookData } from "@/hooks/useLogbookData";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import StatCard from "@/components/dashboard/StatCard";
 import LoadChart from "@/components/dashboard/LoadChart";
 import StatusPieChart from "@/components/dashboard/StatusPieChart";
@@ -36,15 +36,21 @@ import {
 } from "@/lib/calculations";
 
 export default function DashboardPage() {
+  const [isMounted, setIsMounted] = useState(false);
+  
   const { data: session } = useSession();
   const { data, isLoading, refetch } = useLogbookData();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  if (isLoading) return null; // Handled by layout loader
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (isLoading || !isMounted) return null; // Wait for mounting for stable layout
   if (!session) return null;
 
-  const userRole = (session.user as any).role;
-  const isCoach = userRole === "coach";
+  const userRole = (session.user as any).role || "";
+  const isCoach = userRole.toString().toLowerCase() === "coach";
 
   if (isCoach) {
     return (
@@ -149,8 +155,8 @@ export default function DashboardPage() {
               <p className="text-[10px] font-black text-gold-600 uppercase tracking-widest">Assessment Mandiri</p>
               <h4 className="text-2xl font-bold text-white uppercase tracking-tighter">Radar Performa</h4>
             </div>
-            <div className="h-[280px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] w-full mt-4 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={300}>
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                   <PolarGrid stroke="#ffffff10" />
                   <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
@@ -159,8 +165,10 @@ export default function DashboardPage() {
                     name="Performance"
                     dataKey="A"
                     stroke="#D4AF37"
+                    strokeWidth={3}
                     fill="#D4AF37"
-                    fillOpacity={0.6}
+                    fillOpacity={0.5}
+                    dot={{ r: 4, fill: '#D4AF37', stroke: '#000', strokeWidth: 2 }}
                   />
                 </RadarChart>
               </ResponsiveContainer>

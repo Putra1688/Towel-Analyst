@@ -87,10 +87,16 @@ export function getRadarData(masterTests: any[], results: any[]) {
    
    return components.map(comp => {
       const testsInComp = masterTests.filter(t => t.Category === comp);
-      const testNames = testsInComp.map(t => t.Name);
+      const testIdentifiers = testsInComp.flatMap(t => [
+         (t.Test_ID || "").toString().toLowerCase(),
+         (t.Name || "").toString().toLowerCase()
+      ]);
       
       const scores = results
-         .filter(r => testNames.includes(r.Metric))
+         .filter(r => {
+            const resultId = (r.Test_ID || r.Test_Name || r.Metric || "").toString().toLowerCase();
+            return testIdentifiers.includes(resultId);
+         })
          .map(r => r.achievement || 0);
       
       const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
@@ -191,8 +197,8 @@ export function calculateMetrics(logbook: LogbookEntry[]) {
     strain: Math.round(strain),
     acwr: parseFloat(acwr.toFixed(2)),
     dailyLoads: sorted.map(d => ({
-      ...d,
-      load: calculateDailyLoad(d)
+      label: d.Date,
+      value: calculateDailyLoad(d)
     }))
   };
 }

@@ -97,10 +97,24 @@ export default function AthleteDetail() {
    const [isAddingSession, setIsAddingSession] = useState(false);
    const [isAddingTestResult, setIsAddingTestResult] = useState(false);
 
+   const [isMounted, setIsMounted] = useState(false);
+   
    // -- DATA PROCESSING (HOOKS AT TOP) --
+   useEffect(() => {
+      setIsMounted(true);
+   }, []);
+
    const athleteSummary = useMemo(() => {
       const decodedId = decodeURIComponent(id as string).toLowerCase();
-      return data?.summary?.find((s: any) => s.user.User_ID?.toString().toLowerCase() === decodedId);
+      // Case 1: Coach is viewing (data.summary exists)
+      if (data?.summary) {
+         return data.summary.find((s: any) => s.user.User_ID?.toString().toLowerCase() === decodedId);
+      }
+      // Case 2: Athlete is viewing themselves
+      if (data?.user) {
+         return data;
+      }
+      return null;
    }, [data, id]);
 
    const athleteLogs = useMemo(() => {
@@ -141,8 +155,8 @@ export default function AthleteDetail() {
          setLocalProfile(athleteSummary.user);
          setProfileForm({
             Name: athleteSummary.user.Name,
-            Weight: athleteSummary.user.Weight,
-            Height: athleteSummary.user.Height,
+            Weight: athleteSummary.user.Weight || athleteSummary.user.BB || 0,
+            Height: athleteSummary.user.Height || athleteSummary.user.TB || 0,
             Birth_Date: athleteSummary.user.Birth_Date || ""
          });
          setTestResults(athleteSummary.tes_fisik || []);
@@ -336,8 +350,8 @@ export default function AthleteDetail() {
                      <div className="grid grid-cols-2 gap-3 w-full">
                         <BioStat label="TGL LAHIR" value={currentProfile.Birth_Date || "N/A"} />
                         <BioStat label="USIA" value={`${age} Thn`} />
-                        <BioStat label="BERAT" value={`${currentProfile.Weight} Kg`} />
-                        <BioStat label="TINGGI" value={`${currentProfile.Height} Cm`} />
+                        <BioStat label="BERAT" value={`${currentProfile.Weight || currentProfile.BB || 0} Kg`} />
+                        <BioStat label="TINGGI" value={`${currentProfile.Height || currentProfile.TB || 0} Cm`} />
                      </div>
                   </div>
 
@@ -409,8 +423,10 @@ export default function AthleteDetail() {
                                           name="Performance"
                                           dataKey="A"
                                           stroke="#D4AF37"
+                                          strokeWidth={3}
                                           fill="#D4AF37"
-                                          fillOpacity={0.6}
+                                          fillOpacity={0.5}
+                                          dot={{ r: 4, fill: '#D4AF37', stroke: '#000', strokeWidth: 2 }}
                                        />
                                     </RadarChart>
                                  </ResponsiveContainer>

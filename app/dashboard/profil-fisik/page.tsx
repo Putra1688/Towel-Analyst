@@ -1,7 +1,7 @@
 "use client";
 
 import { useLogbookData } from "@/hooks/useLogbookData";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { 
    AreaChart, 
    Area, 
@@ -24,20 +24,28 @@ import {
 } from "lucide-react";
 
 export default function ProfilFisikPage() {
+   const [isMounted, setIsMounted] = useState(false);
    const { data, isLoading } = useLogbookData();
    const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+
+   useEffect(() => {
+      setIsMounted(true);
+   }, []);
 
    const timelineData = useMemo(() => {
       const logs = data?.logbook || [];
       return aggregateByTimeline(logs, timeframe, 'Date');
    }, [data, timeframe]);
 
-   if (isLoading) return (
+   if (isLoading || !isMounted) return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
          <div className="w-8 h-8 border-4 border-gold-600 border-t-transparent rounded-full animate-spin" />
          <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px]">Memuat Profil Fisik...</p>
       </div>
    );
+
+   const weight = data?.user?.Weight || data?.user?.BB || 0;
+   const height = data?.user?.Height || data?.user?.TB || 0;
 
    return (
       <div className="space-y-8 animate-in slide-in-from-right duration-700">
@@ -68,7 +76,7 @@ export default function ProfilFisikPage() {
             <div className="p-8 bg-[#111] border border-white/5 rounded-[40px] flex items-center justify-between group hover:border-gold-600/30 transition-all">
                <div className="space-y-2">
                   <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Berat Badan</p>
-                  <h3 className="text-4xl font-black text-white">{data?.weight || 0} <span className="text-sm font-bold text-zinc-700">KG</span></h3>
+                  <h3 className="text-4xl font-black text-white">{weight} <span className="text-sm font-bold text-zinc-700">KG</span></h3>
                </div>
                <div className="w-16 h-16 rounded-3xl bg-zinc-800 flex items-center justify-center text-gold-600 border border-white/5">
                   <Weight className="w-8 h-8" />
@@ -78,7 +86,7 @@ export default function ProfilFisikPage() {
             <div className="p-8 bg-[#111] border border-white/5 rounded-[40px] flex items-center justify-between group hover:border-gold-600/30 transition-all">
                <div className="space-y-2">
                   <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Tinggi Badan</p>
-                  <h3 className="text-4xl font-black text-white">{data?.height || 0} <span className="text-sm font-bold text-zinc-700">CM</span></h3>
+                  <h3 className="text-4xl font-black text-white">{height} <span className="text-sm font-bold text-zinc-700">CM</span></h3>
                </div>
                <div className="w-16 h-16 rounded-3xl bg-zinc-800 flex items-center justify-center text-gold-600 border border-white/5">
                   <Ruler className="w-8 h-8" />
