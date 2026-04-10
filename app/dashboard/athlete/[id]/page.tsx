@@ -616,22 +616,32 @@ export default function AthleteDetail() {
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                  <div className="md:col-span-3 space-y-3">
                                     <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Pilih Komponen</p>
-                                    <select value={selectedComponent} onChange={(e) => { setSelectedComponent(e.target.value); setCurrentExercise({ ...currentExercise, activity: "" }); }} className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none" >
-                                       <option value="" className="bg-dashboard-bg">Semua Komponen</option>
-                                       <option value="Endurance">Endurance</option>
-                                       <option value="Strength">Strength</option>
-                                       <option value="Speed">Speed</option>
-                                       <option value="Agility">Agility</option>
-                                       <option value="Flexibility">Flexibility</option>
-                                       <option value="Power">Power</option>
-                                       <option value="Umum">Umum</option>
+                                    <select 
+                                       value={selectedComponent} 
+                                       onChange={(e) => { setSelectedComponent(e.target.value); setCurrentExercise({ ...currentExercise, activity: "" }); }} 
+                                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none [color-scheme:dark]" 
+                                    >
+                                       <option value="" className="bg-[#111]">Semua Komponen</option>
+                                       <option value="Endurance" className="bg-[#111]">Endurance</option>
+                                       <option value="Strength" className="bg-[#111]">Strength</option>
+                                       <option value="Speed" className="bg-[#111]">Speed</option>
+                                       <option value="Agility" className="bg-[#111]">Agility</option>
+                                       <option value="Flexibility" className="bg-[#111]">Flexibility</option>
+                                       <option value="Power" className="bg-[#111]">Power</option>
+                                       <option value="Umum" className="bg-[#111]">Umum</option>
                                     </select>
                                  </div>
                                  <div className="md:col-span-3 space-y-3">
                                     <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Jenis Latihan</p>
-                                    <select value={currentExercise.activity} onChange={(e) => setCurrentExercise({ ...currentExercise, activity: e.target.value })} className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none" >
-                                       <option value="" disabled>Pilih Latihan...</option>
-                                       {data?.masterTests?.filter((t: any) => !selectedComponent || t.Category === selectedComponent).map((test: any) => (<option key={test.Test_ID} value={test.Name}>{test.Name}</option>))}
+                                    <select 
+                                       value={currentExercise.activity} 
+                                       onChange={(e) => setCurrentExercise({ ...currentExercise, activity: e.target.value })} 
+                                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all appearance-none [color-scheme:dark]" 
+                                    >
+                                       <option value="" disabled className="bg-[#111]">Pilih Latihan...</option>
+                                       {data?.masterTests?.filter((t: any) => !selectedComponent || t.Category === selectedComponent).map((test: any) => (
+                                          <option key={test.Test_ID} value={test.Name} className="bg-[#111]">{test.Name}</option>
+                                       ))}
                                     </select>
                                  </div>
                                  <div className="md:col-span-1 space-y-3 text-center">
@@ -646,8 +656,21 @@ export default function AthleteDetail() {
                                     <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">KG</p>
                                     <input type="number" value={currentExercise.load || ""} onChange={(e) => setCurrentExercise({ ...currentExercise, load: Number(e.target.value) })} className="w-full bg-white/5 border border-white/5 rounded-xl py-4 text-center text-xs font-black text-white" />
                                  </div>
-                                 <div className="md:col-span-2 space-y-3">
-                                    <button onClick={handleAddExercise} className="w-full py-4 bg-gold-600 text-zinc-950 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gold-500">+ Tambah</button>
+                                 <div className="md:col-span-12 space-y-3 mt-4">
+                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Catatan Tambahan (Opsional)</p>
+                                    <textarea 
+                                       value={currentExercise.note} 
+                                       onChange={(e) => setCurrentExercise({ ...currentExercise, note: e.target.value })} 
+                                       placeholder="Contoh: Fokus pada tempo lambat, tahan 2 detik di bawah..."
+                                       rows={2}
+                                       className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none focus:border-gold-600/30 transition-all resize-none placeholder:text-zinc-800"
+                                    />
+                                 </div>
+
+                                 <div className="md:col-span-12 mt-6">
+                                    <button onClick={handleAddExercise} className="w-full py-4 bg-gold-600 text-zinc-950 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gold-500 shadow-[0_0_20px_rgba(212,175,55,0.2)] active:scale-[0.98]">
+                                       + Tambahkan ke Sesi Latihan
+                                    </button>
                                  </div>
                               </div>
                            </div>
