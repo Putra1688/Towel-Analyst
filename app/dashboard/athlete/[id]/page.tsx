@@ -314,19 +314,19 @@ export default function AthleteDetail() {
       <>
          <div className="space-y-8 animate-in slide-in-from-right duration-700">
             {/* Header */}
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+               <div className="flex items-center gap-4 w-full md:w-auto">
                   <button
                      onClick={() => router.back()}
-                     className="p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-gold-600/10 hover:text-gold-600 transition-all active:scale-90"
+                     className="p-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-gold-600/10 hover:text-gold-600 transition-all active:scale-90 shrink-0"
                   >
                      <ArrowLeft className="w-5 h-5" />
                   </button>
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0">
                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Profil Atlet Detail</p>
-                     <div className="flex items-center gap-3">
-                        <h2 className="text-3xl font-extrabold text-white tracking-widest uppercase">{currentProfile.Name}</h2>
-                        <div className="px-2 py-0.5 bg-zinc-800 rounded text-[9px] font-black text-zinc-500 uppercase tracking-widest border border-white/5">
+                     <div className="flex flex-wrap items-center gap-3">
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-widest uppercase truncate max-w-[200px] md:max-w-none">{currentProfile.Name}</h2>
+                        <div className="px-2 py-0.5 bg-zinc-800 rounded text-[9px] font-black text-zinc-500 uppercase tracking-widest border border-white/5 shrink-0">
                            {currentProfile.Cabor || "Cabor N/A"}
                         </div>
                      </div>
@@ -334,7 +334,7 @@ export default function AthleteDetail() {
                </div>
                <button
                   onClick={() => setIsEditModalOpen(true)}
-                  className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black text-gold-600 uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                  className="w-full md:w-auto px-6 py-4 md:py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-black text-gold-600 uppercase tracking-widest transition-all shadow-xl active:scale-95"
                >
                   Edit Profil
                </button>

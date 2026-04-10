@@ -133,16 +133,16 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in slide-in-from-right duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-1 w-full md:w-auto">
           <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Pusat Komando Performa</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-widest uppercase leading-[.9]">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-widest uppercase leading-tight">
             Dashboard <span className="text-gold-600">Atlet</span>
           </h2>
         </div>
-        <div className="px-6 py-3 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Sistem Terverifikasi</p>
+        <div className="w-full md:w-auto px-6 py-4 md:py-3 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-3">
+          <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">Sistem Terverifikasi</p>
         </div>
       </div>
 
